@@ -57,7 +57,7 @@ app.post('/api/quizzes', authenticatedUser, async (req, res) => {
     settings: body.settings || {}
   };
   const { data, error } = await supabaseAdmin.from('quizzes').insert(row).select('*').single();
-  if (error) return res.status(500).json({ error: 'Salvataggio quiz non riuscito.' });
+  if (error) { console.error('Supabase quiz insert failed:', error); return res.status(500).json({ error: 'Salvataggio quiz non riuscito.', code: error.code || null, details: error.message || null }); }
   res.status(201).json({ quiz: data });
 });
 
