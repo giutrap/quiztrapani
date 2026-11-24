@@ -114,7 +114,7 @@ const publicState = game => ({
   players: [...game.players.values()].map(p => ({ id: p.id, nickname: p.nickname, score: p.score, answered: p.answered })),
   answerCount: [...game.players.values()].filter(p => p.answered).length,
   totalQuestions: game.quiz.questions.length,
-  reveal: game.reveal ? { correct: game.reveal.correct, explanation: game.reveal.explanation, scores: game.reveal.scores } : null
+  reveal: game.reveal ? { correct: game.reveal.correct, explanation: game.reveal.explanation, scores: game.reveal.scores, speedBonuses:game.reveal.speedBonuses||[] } : null
 });
 
 function emitState(game) { io.to(game.code).emit('game:state', publicState(game)); }
@@ -131,16 +131,19 @@ async function closeQuestion(game, reason = 'teacher') {
   const question = game.quiz.questions[game.questionIndex];
   const scores = [];
   const answerRows = [];
+  const speedBonuses = [...game.players.values()].filter(player=>player.answered&&player.lastCorrect&&Number.isFinite(player.answeredAt)).sort((a,b)=>a.answeredAt-b.answeredAt).slice(0,3);
+  const bonusValues=[Number(game.quiz.speedBonuses?.first??300),Number(game.quiz.speedBonuses?.second??200),Number(game.quiz.speedBonuses?.third??100)];
+  const bonusByPlayer=new Map(speedBonuses.map((player,index)=>[player.id,{rank:index+1,bonus:Math.max(0,bonusValues[index]||0)}]));
   for (const player of game.players.values()) {
     let points = 0;
     if (player.answered) {
       if (player.lastCorrect) {
-        points = question.kind === 'plus' ? Number(game.quiz.plusPoints || 1500) : Number(game.quiz.standardPoints || 1000);
-        player.score += points;
+        points = Number(question.points ?? (question.kind === 'plus' ? game.quiz.plusPoints : game.quiz.standardPoints) ?? 1000);
+        points += bonusByPlayer.get(player.id)?.bonus || 0;
       } else {
-        points = -Number(game.quiz.wrongPenalty || 0);
-        player.score += points;
+        points = -Number(question.wrongPenalty ?? game.quiz.wrongPenalty ?? 0);
       }
+      player.score += points;
       if (player.dbId) answerRows.push({
         game_id: game.dbId, player_id: player.dbId, question_index: game.questionIndex,
         answer_index: player.lastAnswer, is_correct: player.lastCorrect, points
@@ -148,6 +151,7 @@ async function closeQuestion(game, reason = 'teacher') {
     }
     scores.push({ nickname: player.nickname, score: player.score });
     player.answered = false;
+    player.answeredAt = null;
     player.lastCorrect = false;
     player.lastAnswer = null;
     if (supabaseAdmin && player.dbId) {
@@ -162,7 +166,7 @@ async function closeQuestion(game, reason = 'teacher') {
   game.status = 'reveal';
   game.paused = false;
   game.deadline = null;
-  game.reveal = { correct: question.correct, explanation: question.explanation || '', scores, reason };
+  game.reveal = { correct: question.correct, explanation: question.explanation || '', scores, reason, speedBonuses:speedBonuses.map((player,index)=>({nickname:player.nickname,rank:index+1,bonus:bonusByPlayer.get(player.id)?.bonus||0})).filter(item=>item.bonus>0) };
   emitState(game);
 }
 
@@ -286,7 +290,7 @@ io.on('connection', socket => {
     const question = game.quiz.questions[game.questionIndex];
     if (player.answered) return ack({ ok: false, error: 'Hai già risposto.' });
     if (!Number.isInteger(answer) || answer < 0 || answer >= question.answers.length) return ack({ ok: false, error: 'Risposta non valida.' });
-    player.answered = true; player.lastAnswer = answer; player.lastCorrect = answer === question.correct;
+    player.answered = true; player.answeredAt = Date.now(); player.lastAnswer = answer; player.lastCorrect = answer === question.correct;
     ack({ ok: true }); emitState(game);
   });
 
