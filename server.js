@@ -2,11 +2,64 @@ import express from 'express';
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
 import { randomInt } from 'node:crypto';
+import { createClient } from '@supabase/supabase-js';
 
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, { cors: { origin: '*' } });
+
 const games = new Map();
+const supabaseUrl = process.env.SUPABASE_URL;
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseAdmin = supabaseUrl && serviceRoleKey
+  ? createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false, autoRefreshToken: false } })
+  : null;
+
+app.use(express.json({ limit: '2mb' }));
+
+async function authenticatedUser(req, res, next) {
+  if (!supabaseAdmin) return res.status(503).json({ error: 'Database non configurato sul server.' });
+  const token = (req.headers.authorization || '').replace(/^Bearer\\s+/i, '');
+  if (!token) return res.status(401).json({ error: 'Autenticazione richiesta.' });
+  const { data, error } = await supabaseAdmin.auth.getUser(token);
+  if (error || !data?.user) return res.status(401).json({ error: 'Sessione docente non valida.' });
+  req.teacher = data.user;
+  next();
+}
+
+app.get('/api/health', (_req, res) => res.json({ ok: true, supabaseConfigured: Boolean(supabaseAdmin) }));
+
+app.get('/api/quizzes', authenticatedUser, async (req, res) => {
+  const { data, error } = await supabaseAdmin.from('quizzes').select('*').eq('owner_id', req.teacher.id).order('updated_at', { ascending: false });
+  if (error) return res.status(500).json({ error: 'Impossibile caricare i quiz.' });
+  res.json({ quizzes: data || [] });
+});
+
+app.post('/api/quizzes', authenticatedUser, async (req, res) => {
+  const body = req.body || {};
+  if (!body.title?.trim() || !Array.isArray(body.questions) || !body.questions.length || body.questions.length > 50) {
+    return res.status(400).json({ error: 'Dati del quiz non validi.' });
+  }
+  const row = {
+    owner_id: req.teacher.id,
+    title: String(body.title).trim().slice(0, 180),
+    subject: String(body.subject || 'IRC').slice(0, 80),
+    school_level: String(body.school_level || '').slice(0, 80),
+    topic: String(body.topic || '').slice(0, 240),
+    questions: body.questions,
+    settings: body.settings || {}
+  };
+  const { data, error } = await supabaseAdmin.from('quizzes').insert(row).select('*').single();
+  if (error) return res.status(500).json({ error: 'Salvataggio quiz non riuscito.' });
+  res.status(201).json({ quiz: data });
+});
+
+app.delete('/api/quizzes/:id', authenticatedUser, async (req, res) => {
+  const { error } = await supabaseAdmin.from('quizzes').delete().eq('id', req.params.id).eq('owner_id', req.teacher.id);
+  if (error) return res.status(500).json({ error: 'Eliminazione quiz non riuscita.' });
+  res.json({ ok: true });
+});
+
 
 app.get('/health', (_req, res) => res.json({ ok: true, service: 'quiz-scolastico-realtime', activeGames: games.size }));
 app.get('/', (_req, res) => res.json({ service: 'Quiz scolastico realtime' }));
