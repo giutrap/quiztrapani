@@ -169,3 +169,9 @@
  .student-countdown{width:92px;min-height:88px;flex-basis:92px;border-radius:17px}
  .student-countdown strong{font-size:3.25rem}
 }
+
+
+.history-row-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.history-row .btn-delete{background:#fff1f0;color:#a63d36;border:1px solid #f3d4d1}
+.history-row .btn-delete:hover{background:#ffe5e2}
+@media(max-width:640px){.history-row-actions{width:100%}.history-row-actions .btn{flex:1;width:auto}}
