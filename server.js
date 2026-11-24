@@ -72,6 +72,18 @@ app.get('/api/games', authenticatedUser, async (req, res) => {
   res.json({ games: data || [] });
 });
 
+app.delete('/api/games/:id', authenticatedUser, async (req, res) => {
+  const { data: game, error: lookupError } = await supabaseAdmin.from('games').select('id').eq('id', req.params.id).eq('host_id', req.teacher.id).single();
+  if (lookupError || !game) return res.status(404).json({ error: 'Partita non trovata o non autorizzata.' });
+  const { error: answersError } = await supabaseAdmin.from('game_answers').delete().eq('game_id', game.id);
+  if (answersError) return res.status(500).json({ error: 'Impossibile eliminare le risposte della partita.' });
+  const { error: playersError } = await supabaseAdmin.from('game_players').delete().eq('game_id', game.id);
+  if (playersError) return res.status(500).json({ error: 'Impossibile eliminare i partecipanti della partita.' });
+  const { error: gameError } = await supabaseAdmin.from('games').delete().eq('id', game.id).eq('host_id', req.teacher.id);
+  if (gameError) return res.status(500).json({ error: 'Eliminazione della partita non riuscita.' });
+  res.json({ ok: true });
+});
+
 app.get('/api/games/:id', authenticatedUser, async (req, res) => {
   const { data: game, error } = await supabaseAdmin.from('games').select('*').eq('id', req.params.id).eq('host_id', req.teacher.id).single();
   if (error || !game) return res.status(404).json({ error: 'Partita non trovata.' });
