@@ -35,7 +35,8 @@ const christmasDemo = {
     { text: 'In Italia, in quale giorno arriva tradizionalmente la Befana?', options: ['25 dicembre', '31 dicembre', '6 gennaio', '2 febbraio'], correct: 2, kind: 'standard', seconds: 15, explanation: 'La Befana arriva nella notte tra il 5 e il 6 gennaio, in occasione dell’Epifania.' }
   ]
 };
-\nconst colors = ['answer-red','answer-blue','answer-yellow','answer-green'];
+
+const colors = ['answer-red','answer-blue','answer-yellow','answer-green','answer-purple'];
 const letters = ['A','B','C','D','E'];
 
 function App() {
@@ -45,7 +46,9 @@ function App() {
   const [area,setArea] = useState('biennio');
   const [q,setQ] = useState(0);
   const [answer,setAnswer] = useState(null);
-  const [score,setScore] = useState(0);\n  const [activeQuiz,setActiveQuiz] = useState({title:'Quiz dimostrativo IRC',questions:quiz.questions,standardPoints:1000,plusPoints:1500,wrongPenalty:0,area:'biennio'});\n  const [correctCount,setCorrectCount] = useState(0);
+  const [score,setScore] = useState(0);
+  const [activeQuiz,setActiveQuiz] = useState({title:'Quiz dimostrativo IRC',questions:quiz.questions,standardPoints:1000,plusPoints:1500,wrongPenalty:0,area:'biennio'});
+  const [correctCount,setCorrectCount] = useState(0);
   const [teacherPass,setTeacherPass] = useState('');
   const [teacherOpen,setTeacherOpen] = useState(false);
   const [title,setTitle] = useState('');
@@ -62,7 +65,7 @@ function App() {
   const updateDraft = (index,patch) => setDraftQuestions(items=>items.map((item,i)=>i===index?{...item,...patch}:item));
   const updateOption = (index,optionIndex,value) => setDraftQuestions(items=>items.map((item,i)=>i===index?{...item,options:item.options.map((option,j)=>j===optionIndex?value:option)}:item));
   const changeOptionCount = (index,count) => setDraftQuestions(items=>items.map((item,i)=>i===index?{...item,options:Array.from({length:count},(_,j)=>item.options[j]||''),correct:item.correct===null?null:Math.min(item.correct,count-1)}:item));
-  const addDraftQuestion = () => {if(draftQuestions.length<50)setDraftQuestions(items=>[...items,{id:Date.now(),text:'',options:['','','',''],correct:0,kind:'standard',seconds:20,explanation:''}])};
+  const addDraftQuestion = () => {if(draftQuestions.length<50)setDraftQuestions(items=>[...items,{id:Date.now(),text:'',options:['','','',''],correct:null,kind:'standard',seconds:20,explanation:''}])};
   const saveDraftQuiz = () => {
     const cleanQuestions=draftQuestions.map((item,index)=>({...item,number:index+1,options:item.options.map(v=>v.trim())}));
     if(!title.trim()||!cleanQuestions.length||cleanQuestions.some(item=>!item.text.trim()||item.options.length<2||item.options.some(v=>!v)||item.correct===null))return;
@@ -70,8 +73,9 @@ function App() {
     const updated=[entry,...savedQuizzes];setSavedQuizzes(updated);localStorage.setItem('quiz-scolastico-quizzes',JSON.stringify(updated));
     setTitle('');setQuizTopic('');setQuizArea('biennio');setQuizClass('1ª');setDraftQuestions([{id:Date.now(),text:'',options:['','','',''],correct:0,kind:'standard',seconds:20,explanation:''}]);setScreen('teacher');
   };
-  const start = (a) => { setArea(a); setQ(0); setAnswer(null); setScore(0); setScreen('game'); };
-  const next = () => { if (q === quiz.questions.length-1) setScreen('results'); else {setQ(q+1);setAnswer(null);} };
+  const start = (a) => { setActiveQuiz({title:'Quiz dimostrativo IRC',questions:quiz.questions.map(item=>({...item,kind:'standard',seconds:20})),standardPoints:1000,plusPoints:1500,wrongPenalty:0,area:a});setArea(a);setQ(0);setAnswer(null);setScore(0);setCorrectCount(0);setScreen('game'); };
+  const startSavedQuiz = (item) => {setActiveQuiz({...item,questions:item.questions.map(question=>({question:question.text,answers:question.options,correct:question.correct,explanation:question.explanation||'',kind:question.kind||'standard',seconds:question.seconds||20}))});setArea(item.area);setQ(0);setAnswer(null);setScore(0);setCorrectCount(0);setScreen('game');};
+  const next = () => { if (q === activeQuiz.questions.length-1) setScreen('results'); else {setQ(q+1);setAnswer(null);} };
   const Header = () => <header className="topbar"><button className="brand" onClick={()=>setScreen('home')}><span className="brand-mark"><GraduationCap size={22}/></span><span>quiz<span className="brand-light"> scolastico</span></span></button><span className="topbar-note"><Sparkles size={15}/> IMPARA, GIOCA, SFIDA TE STESSO</span></header>;
   return <div className="app-shell"><Header/>
     {screen==='home' && <main className="home-page">
