@@ -34,15 +34,15 @@ function App() {
   const [standardPoints,setStandardPoints] = useState(1000);
   const [plusPoints,setPlusPoints] = useState(1500);
   const [wrongPenalty,setWrongPenalty] = useState(0);
-  const [draftQuestions,setDraftQuestions] = useState([{id:1,text:'',options:['','','',''],correct:0,kind:'standard',seconds:20,explanation:''}]);
+  const [draftQuestions,setDraftQuestions] = useState([{id:1,text:'',options:['','','',''],correct:null,kind:'standard',seconds:20,explanation:''}]);
   const current = quiz.questions[q];
   const updateDraft = (index,patch) => setDraftQuestions(items=>items.map((item,i)=>i===index?{...item,...patch}:item));
   const updateOption = (index,optionIndex,value) => setDraftQuestions(items=>items.map((item,i)=>i===index?{...item,options:item.options.map((option,j)=>j===optionIndex?value:option)}:item));
-  const changeOptionCount = (index,count) => setDraftQuestions(items=>items.map((item,i)=>i===index?{...item,options:Array.from({length:count},(_,j)=>item.options[j]||''),correct:Math.min(item.correct,count-1)}:item));
+  const changeOptionCount = (index,count) => setDraftQuestions(items=>items.map((item,i)=>i===index?{...item,options:Array.from({length:count},(_,j)=>item.options[j]||''),correct:item.correct===null?null:Math.min(item.correct,count-1)}:item));
   const addDraftQuestion = () => {if(draftQuestions.length<50)setDraftQuestions(items=>[...items,{id:Date.now(),text:'',options:['','','',''],correct:0,kind:'standard',seconds:20,explanation:''}])};
   const saveDraftQuiz = () => {
     const cleanQuestions=draftQuestions.map((item,index)=>({...item,number:index+1,options:item.options.map(v=>v.trim())}));
-    if(!title.trim()||!cleanQuestions.length||cleanQuestions.some(item=>!item.text.trim()||item.options.length<2||item.options.some(v=>!v)||!item.explanation.trim()))return;
+    if(!title.trim()||!cleanQuestions.length||cleanQuestions.some(item=>!item.text.trim()||item.options.length<2||item.options.some(v=>!v)||item.correct===null||!item.explanation.trim()))return;
     const entry={id:Date.now(),title:title.trim(),area:quizArea,className:quizClass,topic:quizTopic.trim(),standardPoints:Number(standardPoints),plusPoints:Number(plusPoints),wrongPenalty:Number(wrongPenalty),questions:cleanQuestions,createdAt:new Date().toISOString()};
     const updated=[entry,...savedQuizzes];setSavedQuizzes(updated);localStorage.setItem('quiz-scolastico-quizzes',JSON.stringify(updated));
     setTitle('');setQuizTopic('');setQuizArea('biennio');setQuizClass('1ª');setDraftQuestions([{id:Date.now(),text:'',options:['','','',''],correct:0,kind:'standard',seconds:20,explanation:''}]);setScreen('teacher');
