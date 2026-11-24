@@ -74,7 +74,10 @@ function App() {
   const [teacherMessage,setTeacherMessage] = useState('');
   const [title,setTitle] = useState('');
   const [question,setQuestion] = useState('');
-  const [savedGames,setSavedGames] = useState([]);\n  const [selectedGame,setSelectedGame] = useState(null);\n  const [historyBusy,setHistoryBusy] = useState(false);\n  const [savedQuizzes,setSavedQuizzes] = useState(()=>{try{const stored=JSON.parse(localStorage.getItem('quiz-scolastico-quizzes')||'[]');if(!stored.some(item=>item.id===christmasDemo.id)){const next=[christmasDemo,...stored];localStorage.setItem('quiz-scolastico-quizzes',JSON.stringify(next));return next;}return stored;}catch{localStorage.setItem('quiz-scolastico-quizzes',JSON.stringify([christmasDemo]));return [christmasDemo];}});
+  const [savedGames,setSavedGames] = useState([]);
+  const [selectedGame,setSelectedGame] = useState(null);
+  const [historyBusy,setHistoryBusy] = useState(false);
+  const [savedQuizzes,setSavedQuizzes] = useState(()=>{try{const stored=JSON.parse(localStorage.getItem('quiz-scolastico-quizzes')||'[]');if(!stored.some(item=>item.id===christmasDemo.id)){const next=[christmasDemo,...stored];localStorage.setItem('quiz-scolastico-quizzes',JSON.stringify(next));return next;}return stored;}catch{localStorage.setItem('quiz-scolastico-quizzes',JSON.stringify([christmasDemo]));return [christmasDemo];}});
 
   useEffect(() => {
     let alive = true;
