@@ -175,3 +175,12 @@
 .history-row .btn-delete{background:#fff1f0;color:#a63d36;border:1px solid #f3d4d1}
 .history-row .btn-delete:hover{background:#ffe5e2}
 @media(max-width:640px){.history-row-actions{width:100%}.history-row-actions .btn{flex:1;width:auto}}
+
+.speed-bonus-settings{margin-top:16px}
+.speed-bonus-results{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px 16px;margin:16px 0;background:#fff8e9;border:1px solid #f4dfb5;border-radius:14px;color:#76501b}
+.speed-bonus-results>b{width:100%;font-size:.85rem;letter-spacing:.04em}
+.speed-bonus-results>span{display:inline-flex;gap:8px;align-items:center;padding:8px 11px;background:#fff;border-radius:9px;font-size:.85rem}
+.speed-bonus-results strong{color:#7b4ac0}
+.student-speed-bonus{padding:13px 16px;margin:12px 0;background:#fff4dc;border:1px solid #f4dca9;border-radius:13px;color:#805316;font-weight:850}
+.question-extra{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:700px){.question-extra{grid-template-columns:1fr}.speed-bonus-results>span{width:100%;justify-content:space-between}}
