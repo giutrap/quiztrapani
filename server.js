@@ -282,6 +282,7 @@ io.on('connection', socket => {
     for (const game of games.values()) {
       if (game.hostId === socket.id) {
         stopTimer(game);
+        if (game.status === 'question') await closeQuestion(game, 'host-disconnect');
         if (game.status !== 'finished') await persistGameStatus(game, 'finished', { finished_at: new Date().toISOString() });
         io.to(game.code).emit('game:closed');
         games.delete(game.code);
