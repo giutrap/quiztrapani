@@ -26,7 +26,7 @@ app.use(express.json({ limit: '2mb' }));
 
 async function authenticatedUser(req, res, next) {
   if (!supabaseAdmin) return res.status(503).json({ error: 'Database non configurato sul server.' });
-  const token = (req.headers.authorization || '').replace(/^Bearer\\s+/i, '');
+  const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
   if (!token) return res.status(401).json({ error: 'Autenticazione richiesta.' });
   const { data, error } = await supabaseAdmin.auth.getUser(token);
   if (error || !data?.user) return res.status(401).json({ error: 'Sessione docente non valida.' });
