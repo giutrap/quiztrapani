@@ -16,7 +16,7 @@ const publicState = game => ({
   title: game.quiz.title,
   status: game.status,
   questionIndex: game.questionIndex,
-  question: game.(game.status === 'question' || game.status === 'reveal') ? {
+  question: (game.status === 'question' || game.status === 'reveal') ? {
     question: game.quiz.questions[game.questionIndex].question,
     answers: game.quiz.questions[game.questionIndex].answers,
     seconds: game.quiz.questions[game.questionIndex].seconds || 20,
