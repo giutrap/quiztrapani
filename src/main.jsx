@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { createClient } from '@supabase/supabase-js';
 import { createRoot } from 'react-dom/client';
@@ -58,14 +58,50 @@ function App() {
   const [liveError,setLiveError] = useState('');
   const [liveNow,setLiveNow] = useState(Date.now());
   const [studentSelected,setStudentSelected] = useState(null);
+  const audioContextRef = useRef(null);
+  const lastCountdownSoundRef = useRef('');
+  const unlockGameAudio = () => {
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      if (!audioContextRef.current) audioContextRef.current = new AudioContextClass();
+      if (audioContextRef.current.state === 'suspended') audioContextRef.current.resume();
+    } catch (error) { console.warn('Audio countdown non disponibile', error); }
+  };
+  const playCountdownTone = finalTick => {
+    const context = audioContextRef.current;
+    if (!context || context.state !== 'running') return;
+    const playTone = (frequency, startAt, duration, volume) => {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(frequency, startAt);
+      gain.gain.setValueAtTime(0.0001, startAt);
+      gain.gain.exponentialRampToValueAtTime(volume, startAt + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
+      oscillator.connect(gain); gain.connect(context.destination);
+      oscillator.start(startAt); oscillator.stop(startAt + duration + 0.02);
+    };
+    const now = context.currentTime;
+    playTone(finalTick ? 980 : 660, now, finalTick ? 0.22 : 0.12, finalTick ? 0.16 : 0.09);
+    if (finalTick) playTone(1240, now + 0.16, 0.24, 0.18);
+  };
   useEffect(()=>{const timer=setInterval(()=>setLiveNow(Date.now()),200);return()=>clearInterval(timer);},[]);
   const realtimeUrl='https://quiz-scolastico-live.onrender.com';
   const watchSocket = socket => {socket.on('game:state',state=>{setLiveState(previous=>{if(previous?.questionIndex!==state.questionIndex)setStudentSelected(null);return state;});});socket.on('game:closed',()=>{setLiveError('La connessione del docente è terminata.');setScreen('home');});socket.on('connect_error',()=>setLiveError('Server della partita non raggiungibile. Riprova tra qualche secondo.'));};
   const hostQuiz = item => {setLiveError('Connessione alla console docente...');const socket=io(realtimeUrl);setLiveSocket(socket);watchSocket(socket);socket.on('connect',()=>socket.emit('host:create',{accessToken:teacherSession?.access_token,quizId:item.id,quiz:{title:item.title,area:item.area,standardPoints:item.standardPoints,plusPoints:item.plusPoints,wrongPenalty:item.wrongPenalty,questions:item.questions.map(q=>({question:q.text,answers:q.options,correct:q.correct,kind:q.kind||'standard',seconds:q.seconds||20,explanation:q.explanation||''}))}},response=>{if(!response?.ok){setLiveError(response?.error||'Impossibile creare la partita.');return;}setCode(response.code);setLiveState(response.state);setLiveError('');setScreen('host');}));};
-  const joinLiveGame = () => {setLiveError('Connessione alla partita...');const socket=io(realtimeUrl);setLiveSocket(socket);watchSocket(socket);socket.on('connect',()=>socket.emit('student:join',{code,nickname},response=>{if(!response?.ok){setLiveError(response?.error||'Impossibile entrare nella partita.');socket.disconnect();return;}setLiveState(response.state);setLiveError('');setStudentSelected(null);setScreen('student-live');}));};
-  const hostAction = action => liveSocket?.emit(action,response=>{if(response?.error)setLiveError(response.error);});
+  const joinLiveGame = () => {unlockGameAudio();setLiveError('Connessione alla partita...');const socket=io(realtimeUrl);setLiveSocket(socket);watchSocket(socket);socket.on('connect',()=>socket.emit('student:join',{code,nickname},response=>{if(!response?.ok){setLiveError(response?.error||'Impossibile entrare nella partita.');socket.disconnect();return;}setLiveState(response.state);setLiveError('');setStudentSelected(null);setScreen('student-live');}));};
+  const hostAction = action => {if(action==='host:start'||action==='host:resume')unlockGameAudio();liveSocket?.emit(action,response=>{if(response?.error)setLiveError(response.error);});};
   const sendStudentAnswer = index => {if(studentSelected!==null)return;setStudentSelected(index);liveSocket?.emit('student:answer',{answer:index},response=>{if(!response?.ok){setLiveError(response?.error||'Risposta non inviata.');setStudentSelected(null);}});};
   const liveRemaining = liveState ? (liveState.paused ? liveState.remainingMs : liveState.deadline ? Math.max(0,liveState.deadline-liveNow) : liveState.remainingMs) : 0;
+  const countdownSecond = Math.max(0,Math.ceil(liveRemaining/1000));
+  useEffect(()=>{
+    if(liveState?.status!=='question'||liveState.paused||countdownSecond<1||countdownSecond>5)return;
+    const soundKey=(liveState.questionIndex||0)+':'+countdownSecond;
+    if(lastCountdownSoundRef.current===soundKey)return;
+    lastCountdownSoundRef.current=soundKey;
+    playCountdownTone(countdownSecond===1);
+  },[liveState?.status,liveState?.questionIndex,liveState?.paused,countdownSecond]);
   const [teacherEmail,setTeacherEmail] = useState('');
   const [teacherPass,setTeacherPass] = useState('');
   const [teacherUser,setTeacherUser] = useState(null);
@@ -178,13 +214,13 @@ function App() {
     {screen==='host' && liveState && <main className="live-page"><div className="live-head"><div><span className="eyebrow">CONSOLE DOCENTE · PARTITA LIVE</span><h1>{liveState.title}</h1><p>Codice da mostrare alla classe</p><div className="live-code">{liveState.code}</div></div><div className="live-status"><span className="live-dot"/> {liveState.status==='lobby'?'IN ATTESA':liveState.status==='question'?'DOMANDA IN CORSO':liveState.status==='reveal'?'RISPOSTA SVELATA':'PARTITA CONCLUSA'}</div></div>
       <section className="live-panel"><div className="live-panel-head"><h2>Partecipanti</h2><strong>{liveState.players.length}</strong></div>{liveState.players.length===0?<p className="section-help">In attesa che gli studenti entrino con il codice partita.</p>:<div className="player-list">{liveState.players.map(p=><span key={p.id} className="player-chip"><Users size={14}/>{p.nickname}</span>)}</div>}</section>
       {liveState.status==='lobby'&&<section className="live-panel live-center"><h2>La classe è pronta?</h2><p>Quando gli studenti sono entrati, avvia la prima domanda. Il conto alla rovescia partirà per tutti insieme.</p><button className="btn btn-primary btn-large" disabled={!liveState.players.length} onClick={()=>hostAction('host:start')}><Play size={18}/> Avvia domanda 1</button></section>}
-      {liveState.status==='question'&&<section className="live-panel"><div className="live-panel-head"><h2>Domanda {liveState.questionIndex+1} / {liveState.totalQuestions}</h2><div className="live-clock">{liveState.paused?'IN PAUSA':Math.ceil(liveRemaining/1000)+' SEC'}</div></div><h2 className="live-question">{liveState.question?.question}</h2><div className="live-options">{liveState.question?.answers.map((a,i)=><div className={'live-option '+colors[i]} key={i}><b>{letters[i]}</b>{a}</div>)}</div><div className="host-response-meter"><div><b>Risposte ricevute</b><strong>{liveState.answerCount} / {liveState.players.length}</strong></div><div className="host-meter-track"><span style={{width:(liveState.players.length?Math.min(100,liveState.answerCount/liveState.players.length*100):0)+'%'}}/></div><p className="section-help">{liveState.players.length?Math.round(liveState.answerCount/liveState.players.length*100):0}% della classe ha già risposto</p></div><div className="live-controls">{liveState.paused?<button className="btn btn-primary" onClick={()=>hostAction('host:resume')}><Play size={17}/> Riprendi</button>:<button className="btn btn-ghost" onClick={()=>hostAction('host:pause')}>Pausa timer</button>}<button className="btn btn-primary" onClick={()=>hostAction('host:close')}>Chiudi risposte</button></div></section>}
+      {liveState.status==='question'&&<section className="live-panel"><div className="live-question-top"><h2>Domanda {liveState.questionIndex+1} / {liveState.totalQuestions}</h2><div className={'countdown-display '+(liveRemaining<=5000&&!liveState.paused?'countdown-urgent':'')}><span>{liveState.paused?'Ⅱ':countdownSecond}</span><small>{liveState.paused?'IN PAUSA':'SECONDI'}</small></div></div><h2 className="live-question">{liveState.question?.question}</h2><div className="live-options">{liveState.question?.answers.map((a,i)=><div className={'live-option '+colors[i]} key={i}><b>{letters[i]}</b>{a}</div>)}</div><div className="host-response-meter"><div><b>Risposte ricevute</b><strong>{liveState.answerCount} / {liveState.players.length}</strong></div><div className="host-meter-track"><span style={{width:(liveState.players.length?Math.min(100,liveState.answerCount/liveState.players.length*100):0)+'%'}}/></div><p className="section-help">{liveState.players.length?Math.round(liveState.answerCount/liveState.players.length*100):0}% della classe ha già risposto</p></div><div className="live-controls">{liveState.paused?<button className="btn btn-primary" onClick={()=>hostAction('host:resume')}><Play size={17}/> Riprendi</button>:<button className="btn btn-ghost" onClick={()=>hostAction('host:pause')}>Pausa timer</button>}<button className="btn btn-primary" onClick={()=>hostAction('host:close')}>Chiudi risposte</button></div></section>}
       {liveState.status==='reveal'&&<section className="live-panel"><span className="eyebrow">RISPOSTA CORRETTA</span><h2 className="live-question">{liveState.questionIndex+1}. {liveState.question?.question}</h2><div className="live-options">{liveState.question?.answers.map((a,i)=><div className={'live-option '+(i===liveState.reveal?.correct?'is-correct-live':'')} key={i}><b>{letters[i]}</b>{a}{i===liveState.reveal?.correct?' ✓':''}</div>)}</div>{liveState.reveal?.explanation&&<p className="score-note">{liveState.reveal.explanation}</p>}<div className="live-panel-head"><h2>Classifica provvisoria</h2></div><div className="leaderboard">{[...liveState.players].sort((a,b)=>b.score-a.score).map((p,i)=><div key={p.id}><b>{i+1}. {p.nickname}</b><strong>{p.score} pt</strong></div>)}</div><button className="btn btn-primary btn-large" onClick={()=>hostAction('host:next')}>{liveState.questionIndex===liveState.totalQuestions-1?'Concludi partita':'Prossima domanda'} <ArrowRight size={17}/></button></section>}
       {liveState.status==='finished'&&<section className="live-panel live-center"><Trophy size={38}/><h2>Partita completata!</h2><div className="leaderboard">{[...liveState.players].sort((a,b)=>b.score-a.score).map((p,i)=><div key={p.id}><b>{i+1}. {p.nickname}</b><strong>{p.score} pt</strong></div>)}</div><button className="btn btn-primary" onClick={()=>{liveSocket?.disconnect();setLiveSocket(null);setLiveState(null);setScreen('teacher');if(teacherSession)loadRemoteGames(teacherSession);}}>Torna alla libreria</button></section>}
       {liveError&&<div className="demo-notice">{liveError}</div>}</main>}
     {screen==='student-live' && liveState && <main className="live-page student-live-page"><div className="student-live-top"><span className="brand-mark"><GraduationCap size={19}/></span><b>QUIZ SCOLASTICO</b><span>{nickname}</span></div>
       {liveState.status==='lobby'&&<section className="live-panel live-center"><Users size={34}/><h1>Sei nella sala d'attesa!</h1><p>Hai effettuato l'accesso alla partita. Attendi che il docente avvii il quiz.</p><div className="live-code">{liveState.code}</div><small>{liveState.players.length} partecipanti collegati</small></section>}
-      {liveState.status==='question'&&<section className="live-panel"><div className="student-question-meta"><span>DOMANDA {liveState.questionIndex+1}/{liveState.totalQuestions}</span><strong className={liveRemaining<6000&&!liveState.paused?'timer-urgent':''}>{liveState.paused?'IN PAUSA':Math.ceil(liveRemaining/1000)+' SEC'}</strong></div><div className="student-progress-track"><span style={{width:((liveState.questionIndex+1)/liveState.totalQuestions*100)+'%'}}/></div><h1 className="live-question">{liveState.question?.question}</h1><div className="student-options">{liveState.question?.answers.map((a,i)=><button key={i} disabled={studentSelected!==null||liveState.paused} onClick={()=>sendStudentAnswer(i)} className={'student-option '+colors[i]+' '+(studentSelected===i?'student-picked':'')}><b>{letters[i]}</b>{a}</button>)}</div>{studentSelected!==null&&<div className="student-answer-confirm"><span>✓</span><div><b>Risposta registrata!</b><small>Hai scelto {letters[studentSelected]}. Ora attendi la chiusura della domanda.</small></div></div>}</section>}
+      {liveState.status==='question'&&<section className="live-panel"><div className="student-question-meta"><span>DOMANDA {liveState.questionIndex+1}/{liveState.totalQuestions}</span><div className={'student-countdown '+(liveRemaining<=5000&&!liveState.paused?'countdown-urgent':'')}><strong>{liveState.paused?'Ⅱ':countdownSecond}</strong><small>{liveState.paused?'IN PAUSA':'SECONDI'}</small></div></div><div className="student-progress-track"><span style={{width:((liveState.questionIndex+1)/liveState.totalQuestions*100)+'%'}}/></div><h1 className="live-question">{liveState.question?.question}</h1><div className="student-options">{liveState.question?.answers.map((a,i)=><button key={i} disabled={studentSelected!==null||liveState.paused} onClick={()=>sendStudentAnswer(i)} className={'student-option '+colors[i]+' '+(studentSelected===i?'student-picked':'')}><b>{letters[i]}</b>{a}</button>)}</div>{studentSelected!==null&&<div className="student-answer-confirm"><span>✓</span><div><b>Risposta registrata!</b><small>Hai scelto {letters[studentSelected]}. Ora attendi la chiusura della domanda.</small></div></div>}</section>}
       {liveState.status==='reveal'&&<section className="live-panel live-center"><Trophy size={34}/><span className="eyebrow">SOLUZIONE</span><h2>La risposta esatta</h2><div className="student-correct-answer">{liveState.question?.answers[liveState.reveal?.correct]}</div>{liveState.reveal?.explanation&&<p>{liveState.reveal.explanation}</p>}<p>Il docente sta preparando la prossima domanda.</p></section>}
       {liveState.status==='finished'&&<section className="live-panel live-center"><Crown size={38}/><h1>Partita completata!</h1><p>Il tuo punteggio: <b>{liveState.players.find(p=>p.nickname===nickname)?.score??0} punti</b></p></section>}
       {liveError&&<div className="demo-notice">{liveError}</div>}</main>}
