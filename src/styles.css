@@ -120,3 +120,20 @@
  .student-option{min-height:72px;padding:15px;font-size:1rem}
  .student-live-page .live-panel{padding:20px 16px;border-radius:20px}
 }
+
+
+/* Schede leggibili per le risposte nello storico */
+.history-answers{display:grid;grid-template-columns:1fr;gap:12px;margin-top:14px}
+.history-answer-card{min-width:0;padding:17px 18px;background:#fff;border:1px solid #eee8f4;border-radius:15px}
+.history-answer-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.history-answer-head>b{color:#342147;font-size:.9rem}
+.history-answer-head>b span{font-weight:600;color:#8d7d9d}
+.history-answer-status{display:inline-flex;align-items:center;padding:7px 10px;border-radius:9px;font-size:.75rem;font-weight:850;white-space:nowrap}
+.history-answer-status.is-right{background:#e8f7ef;color:#21764e}
+.history-answer-status.is-wrong{background:#fff0ed;color:#a8463b}
+.history-question-text{margin:13px 0;color:#39284b;font-size:.92rem;line-height:1.5;font-weight:700;overflow-wrap:anywhere}
+.history-answer-values{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.history-answer-values>div{min-width:0;display:flex;flex-direction:column;gap:6px;padding:12px 13px;background:#f8f6fa;border-radius:11px}
+.history-answer-values small{font-size:.65rem;letter-spacing:.9px;font-weight:900;color:#9586a2}
+.history-answer-values strong{font-size:.86rem;line-height:1.4;color:#48345c;overflow-wrap:anywhere}
+@media(max-width:640px){.history-answer-card{padding:14px}.history-answer-head{align-items:flex-start;flex-direction:column;gap:8px}.history-answer-values{grid-template-columns:1fr}.history-question-text{font-size:.88rem}}
