@@ -144,3 +144,5 @@
 .history-detail .history-answer-card{display:block;width:100%;max-width:100%;overflow:hidden}
 .history-detail .history-answer-values>div{overflow:hidden}
 .history-detail .history-answer-values strong{display:block;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+
+/* Frontend rebuild trigger: history layout update */
