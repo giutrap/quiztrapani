@@ -172,7 +172,7 @@ io.on('connection', socket => {
       let code;
       do { code = String(randomInt(100000, 1000000)); } while (games.has(code));
       const game = {
-        code, hostId: socket.id, hostUserId: authData.user.id, quizId: payload.quizId || null,
+        code, hostId: socket.id, hostUserId: authData.user.id, quizId: /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(payload.quizId || '')) ? payload.quizId : null,
         quiz: payload.quiz, status: 'lobby', questionIndex: -1, players: new Map(),
         timer: null, deadline: null, remainingMs: 0, paused: false, reveal: null, dbId: null
       };
