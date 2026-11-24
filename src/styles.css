@@ -73,3 +73,50 @@
  .history-answers>div{align-items:flex-start;flex-direction:column;gap:4px}
  .history-answers span{text-align:left}
 }
+
+
+/* Live experience: docente desktop e partecipante mobile */
+.host-response-meter{margin:22px 0 18px;padding:18px 20px;background:#f7f3fc;border:1px solid #ebe2f5;border-radius:16px}
+.host-response-meter>div:first-child{display:flex;justify-content:space-between;align-items:center;color:#39224f}
+.host-response-meter>div:first-child strong{font-size:1.1rem;font-variant-numeric:tabular-nums}
+.host-meter-track,.student-progress-track{height:9px;overflow:hidden;background:#e8def1;border-radius:99px}
+.host-meter-track{margin-top:12px}
+.host-meter-track span,.student-progress-track span{display:block;height:100%;background:linear-gradient(90deg,#7650a4,#a47acb);border-radius:99px;transition:width .25s ease}
+.host-response-meter .section-help{margin:9px 0 0}
+.live-head{align-items:flex-start}
+.live-head .live-code{font-size:clamp(2.1rem,5vw,3.3rem);letter-spacing:.16em;padding:12px 24px;box-shadow:0 10px 30px rgba(83,48,116,.12)}
+.live-status{white-space:nowrap}
+.live-panel{box-shadow:0 8px 28px rgba(46,28,66,.045)}
+.live-clock{min-width:92px;text-align:center;font-size:1.1rem;font-weight:850}
+.student-live-page{min-height:100dvh;padding:clamp(14px,4vw,32px);background:radial-gradient(circle at 50% 0,#f2eafa 0,transparent 42%),#faf8fc}
+.student-live-top{position:sticky;top:0;z-index:2;max-width:760px;margin:0 auto 20px;padding:12px 15px;background:rgba(255,255,255,.9);border:1px solid #eee6f5;border-radius:16px;backdrop-filter:blur(12px);box-shadow:0 6px 22px rgba(46,28,66,.05)}
+.student-live-page .live-panel{max-width:760px;margin:0 auto;padding:clamp(20px,5vw,34px);border:1px solid #eee6f5;border-radius:24px;box-shadow:0 14px 40px rgba(46,28,66,.07)}
+.student-question-meta{align-items:center}
+.student-question-meta strong{min-width:78px;padding:10px 13px;text-align:center;border-radius:14px;background:#f0e8f8;color:#57347a;font-size:1.05rem;font-variant-numeric:tabular-nums}
+.student-question-meta strong.timer-urgent{background:#fff0ed;color:#c34435;animation:timer-pulse .9s infinite alternate}
+@keyframes timer-pulse{to{transform:scale(1.05);}}
+.student-progress-track{height:7px;margin:4px 0 24px}
+.student-live-page .live-question{font-size:clamp(1.45rem,5vw,2.25rem);line-height:1.2;letter-spacing:-.025em;margin:18px 0 24px}
+.student-options{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.student-option{min-height:86px;padding:18px;display:flex;align-items:center;gap:14px;text-align:left;font-size:1rem;line-height:1.35;border:2px solid transparent;border-radius:18px;box-shadow:0 5px 14px rgba(44,25,63,.045);transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease}
+.student-option:not(:disabled):active{transform:scale(.985)}
+.student-option b{flex:0 0 34px;width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:rgba(255,255,255,.8);font-weight:850}
+.student-option.student-picked{border-color:#68438c;box-shadow:0 0 0 3px rgba(104,67,140,.12)}
+.student-option:disabled{opacity:.78}
+.student-answer-confirm{display:flex;align-items:center;gap:13px;margin-top:20px;padding:16px;background:#edf8f1;border:1px solid #d3eddb;border-radius:16px;color:#24633c}
+.student-answer-confirm>span{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:#d5f0df;font-size:1.2rem;font-weight:900}
+.student-answer-confirm div{display:grid;gap:3px}
+.student-answer-confirm small{color:#477558}
+.student-correct-answer{width:100%;margin:8px 0 16px;padding:18px;background:#edf8f1;border:1px solid #d3eddb;border-radius:16px;color:#24633c;font-size:1.15rem;font-weight:800}
+.student-live-page .live-center h1,.student-live-page .live-center h2{line-height:1.2}
+@media(max-width:640px){
+ .live-page{padding:14px}
+ .live-head{gap:15px;flex-direction:column}
+ .live-head .live-code{font-size:2.3rem;padding:10px 18px}
+ .live-status{align-self:flex-start}
+ .host-response-meter{padding:15px}
+ .student-live-top{margin-bottom:14px}
+ .student-options{grid-template-columns:1fr;gap:11px}
+ .student-option{min-height:72px;padding:15px;font-size:1rem}
+ .student-live-page .live-panel{padding:20px 16px;border-radius:20px}
+}
