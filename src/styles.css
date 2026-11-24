@@ -15,3 +15,39 @@
 @media(max-width:700px){.editor-page{padding:18px 10px 40px}.editor-wrap{padding:21px 16px}.editor-grid,.score-settings,.options-editor{grid-template-columns:1fr}.editor-field.wide{grid-column:auto}.questions-heading{align-items:flex-start;flex-direction:column}.question-editor{padding:14px}.question-editor-top{align-items:flex-start;flex-direction:column}.option-editor{flex-wrap:wrap}.option-editor .field{flex:1}.editor-actions{align-items:stretch;flex-direction:column}.editor-actions .btn{width:100%}}
 
 .answer-purple{background:#8053b8;color:#fff}
+
+
+/* Live classroom console and student screens */
+.live-page{width:min(100% - 36px,1050px);margin:0 auto;padding:38px 0 70px}
+.live-head{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-bottom:22px}
+.live-head h1{font:900 32px Nunito;color:#29143e;margin:7px 0}
+.live-head p{color:#8b7e97;margin:0 0 8px;font-size:13px}
+.live-code{font:900 38px Nunito;letter-spacing:8px;color:#5d23a5;background:#f1e9fa;border:1px dashed #c9a9e7;border-radius:13px;padding:8px 18px;display:inline-block}
+.live-status{display:flex;align-items:center;gap:8px;background:#e8f8f1;color:#21815f;border-radius:30px;padding:9px 13px;font-size:10px;font-weight:900;letter-spacing:1px}
+.live-dot{width:8px;height:8px;background:#24ad7c;border-radius:50%;box-shadow:0 0 0 4px #24ad7c22}
+.live-panel{background:#fff;border:1px solid #ece5f3;border-radius:18px;padding:24px;margin:16px 0;box-shadow:0 8px 25px #3a205008}
+.live-panel-head{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:16px}
+.live-panel-head h2,.live-panel h2{font:900 20px Nunito;color:#2d1944;margin:0}
+.live-panel-head>strong{font:900 20px Nunito;color:#6428a8;background:#f1eafa;border-radius:10px;padding:6px 12px}
+.player-list{display:flex;gap:9px;flex-wrap:wrap}
+.player-chip{display:inline-flex;align-items:center;gap:7px;background:#f5f1f9;color:#533574;padding:9px 12px;border-radius:30px;font-size:12px;font-weight:800}
+.live-center{text-align:center;padding:34px 24px}.live-center>svg{color:#6b31ad;margin-bottom:10px}.live-center p{max-width:560px;margin:10px auto 20px;color:#81758d;font-size:13px;line-height:1.6}
+.live-clock{font:900 18px Nunito;color:#a36b21;background:#fff5df;padding:8px 13px;border-radius:10px}
+.live-question{font:900 clamp(23px,3.5vw,36px)/1.2 Nunito;color:#2c1741;margin:18px 0 20px}
+.live-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}
+.live-option{display:flex;align-items:center;gap:12px;border-radius:11px;padding:14px;color:white;font-size:14px;font-weight:800;min-height:58px}
+.live-option>b,.student-option>b{height:29px;width:29px;display:grid;place-items:center;border-radius:8px;background:#ffffff2c;flex-shrink:0}
+.live-option.is-correct-live{background:#20a77b;color:#fff;outline:3px solid #b7ead7}
+.live-controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.leaderboard{margin:12px 0 22px}.leaderboard>div{display:flex;justify-content:space-between;padding:11px 13px;border-bottom:1px solid #f0ebf4;color:#49345e;font-size:13px}.leaderboard strong{color:#6a2dab}
+.student-live-page{max-width:760px;padding-top:22px}
+.student-live-top{display:flex;align-items:center;gap:10px;margin-bottom:18px;color:#4d2676;font:900 13px Nunito}
+.student-live-top>span:last-child{margin-left:auto;color:#887a96;font:800 11px 'DM Sans'}
+.student-question-meta{display:flex;justify-content:space-between;color:#8b7a9b;font-size:11px;font-weight:900;letter-spacing:1px}
+.student-question-meta strong{color:#a36b21}
+.student-options{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.student-option{display:flex;align-items:center;gap:11px;min-height:78px;padding:13px;border:0;border-radius:13px;color:#fff;text-align:left;font:800 14px 'DM Sans';cursor:pointer}
+.student-option:disabled{opacity:.65;cursor:default}
+.student-option.student-picked{outline:4px solid #2ab181;outline-offset:3px;opacity:1}
+.student-wait{text-align:center;color:#23815f;font-size:12px;font-weight:800;margin:18px 0 0}
+@media(max-width:700px){.live-page{width:min(100% - 22px,1050px);padding:22px 0 45px}.live-head{flex-direction:column;gap:12px}.live-head h1{font-size:27px}.live-code{font-size:32px}.live-panel{padding:17px}.live-options,.student-options{grid-template-columns:1fr}.live-controls .btn{flex:1}.live-question{font-size:25px}.student-option{min-height:67px}}
