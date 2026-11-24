@@ -41,7 +41,9 @@ const christmasDemo = {
 const colors = ['answer-red','answer-blue','answer-yellow','answer-green','answer-purple'];
 const letters = ['A','B','C','D','E'];
 
-const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);\n\nfunction App() {
+const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+function App() {
   const [screen,setScreen] = useState('home');
   const [nickname,setNickname] = useState('');
   const [code,setCode] = useState('');
