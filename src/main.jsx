@@ -86,6 +86,25 @@ function App() {
     playTone(finalTick ? 980 : 660, now, finalTick ? 0.22 : 0.12, finalTick ? 0.16 : 0.09);
     if (finalTick) playTone(1240, now + 0.16, 0.24, 0.18);
   };
+  const playGongTone = () => {
+    const context = audioContextRef.current;
+    if (!context || context.state !== 'running') return;
+    const now = context.currentTime;
+    // Parziali inarmoniche e decadimento lungo per un gong caldo e riconoscibile.
+    [[110,0.22,2.2],[164.8,0.12,1.8],[220,0.09,1.45],[293.7,0.055,1.1],[392,0.025,0.8]].forEach(([frequency,volume,duration],index)=>{
+      const oscillator=context.createOscillator();
+      const gain=context.createGain();
+      oscillator.type=index<2?'sine':'triangle';
+      oscillator.frequency.setValueAtTime(frequency,now);
+      oscillator.frequency.exponentialRampToValueAtTime(frequency*0.985,now+duration);
+      gain.gain.setValueAtTime(0.0001,now);
+      gain.gain.exponentialRampToValueAtTime(volume,now+0.025);
+      gain.gain.exponentialRampToValueAtTime(0.0001,now+duration);
+      oscillator.connect(gain);gain.connect(context.destination);
+      oscillator.start(now);oscillator.stop(now+duration+0.04);
+    });
+  };
+  const previousLivePhaseRef = useRef({status:null,questionIndex:null});
   useEffect(()=>{const timer=setInterval(()=>setLiveNow(Date.now()),200);return()=>clearInterval(timer);},[]);
   const realtimeUrl='https://quiz-scolastico-live.onrender.com';
   const watchSocket = socket => {socket.on('game:state',state=>{setLiveState(previous=>{if(previous?.questionIndex!==state.questionIndex)setStudentSelected(null);return state;});});socket.on('game:closed',()=>{setLiveError('La connessione del docente è terminata.');setScreen('home');});socket.on('connect_error',()=>setLiveError('Server della partita non raggiungibile. Riprova tra qualche secondo.'));};
@@ -95,6 +114,11 @@ function App() {
   const sendStudentAnswer = index => {if(studentSelected!==null)return;setStudentSelected(index);liveSocket?.emit('student:answer',{answer:index},response=>{if(!response?.ok){setLiveError(response?.error||'Risposta non inviata.');setStudentSelected(null);}});};
   const liveRemaining = liveState ? (liveState.paused ? liveState.remainingMs : liveState.deadline ? Math.max(0,liveState.deadline-liveNow) : liveState.remainingMs) : 0;
   const countdownSecond = Math.max(0,Math.ceil(liveRemaining/1000));
+  useEffect(()=>{
+    const previous=previousLivePhaseRef.current;
+    if(liveState?.status==='reveal'&&previous.status==='question'&&previous.questionIndex===liveState.questionIndex)playGongTone();
+    previousLivePhaseRef.current={status:liveState?.status||null,questionIndex:liveState?.questionIndex??null};
+  },[liveState?.status,liveState?.questionIndex]);
   useEffect(()=>{
     if(liveState?.status!=='question'||liveState.paused||countdownSecond<1||countdownSecond>5)return;
     const soundKey=(liveState.questionIndex||0)+':'+countdownSecond;
