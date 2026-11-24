@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
+import { createClient } from '@supabase/supabase-js';
 import { createRoot } from 'react-dom/client';
 import { GraduationCap, Sparkles, Trophy, Users, Clock3, BookOpen, ShieldCheck, ArrowLeft, ArrowRight, Play, Plus, Pencil, LogIn, Gamepad2, Star, Zap, CheckCircle2, XCircle, Crown } from 'lucide-react';
 import './styles.css';
@@ -40,7 +41,7 @@ const christmasDemo = {
 const colors = ['answer-red','answer-blue','answer-yellow','answer-green','answer-purple'];
 const letters = ['A','B','C','D','E'];
 
-function App() {
+const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);\n\nfunction App() {
   const [screen,setScreen] = useState('home');
   const [nickname,setNickname] = useState('');
   const [code,setCode] = useState('');
@@ -63,11 +64,55 @@ function App() {
   const hostAction = action => liveSocket?.emit(action,response=>{if(response?.error)setLiveError(response.error);});
   const sendStudentAnswer = index => {if(studentSelected!==null)return;setStudentSelected(index);liveSocket?.emit('student:answer',{answer:index},response=>{if(!response?.ok){setLiveError(response?.error||'Risposta non inviata.');setStudentSelected(null);}});};
   const liveRemaining = liveState ? (liveState.paused ? liveState.remainingMs : liveState.deadline ? Math.max(0,liveState.deadline-liveNow) : liveState.remainingMs) : 0;
+  const [teacherEmail,setTeacherEmail] = useState('');
   const [teacherPass,setTeacherPass] = useState('');
-  const [teacherOpen,setTeacherOpen] = useState(false);
+  const [teacherUser,setTeacherUser] = useState(null);
+  const [teacherSession,setTeacherSession] = useState(null);
+  const [teacherBusy,setTeacherBusy] = useState(false);
+  const [teacherMessage,setTeacherMessage] = useState('');
   const [title,setTitle] = useState('');
   const [question,setQuestion] = useState('');
   const [savedQuizzes,setSavedQuizzes] = useState(()=>{try{const stored=JSON.parse(localStorage.getItem('quiz-scolastico-quizzes')||'[]');if(!stored.some(item=>item.id===christmasDemo.id)){const next=[christmasDemo,...stored];localStorage.setItem('quiz-scolastico-quizzes',JSON.stringify(next));return next;}return stored;}catch{localStorage.setItem('quiz-scolastico-quizzes',JSON.stringify([christmasDemo]));return [christmasDemo];}});
+
+  useEffect(() => {
+    let alive = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (!alive) return;
+      setTeacherSession(data.session);
+      setTeacherUser(data.session?.user || null);
+      if (data.session) loadRemoteQuizzes(data.session);
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setTeacherSession(session);
+      setTeacherUser(session?.user || null);
+      if (session) loadRemoteQuizzes(session);
+      else setSavedQuizzes([]);
+    });
+    return () => { alive = false; listener.subscription.unsubscribe(); };
+  }, []);
+  const loadRemoteQuizzes = async session => {
+    try {
+      const response = await fetch(realtimeUrl + '/api/quizzes', { headers: { Authorization: 'Bearer ' + session.access_token } });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Errore caricamento archivio.');
+      setSavedQuizzes((data.quizzes || []).map(row => ({
+        id: row.id, title: row.title, area: row.school_level || 'biennio', className: row.settings?.className || '',
+        topic: row.topic || '', standardPoints: row.settings?.standardPoints ?? 1000,
+        plusPoints: row.settings?.plusPoints ?? 1500, wrongPenalty: row.settings?.wrongPenalty ?? 0,
+        questions: (row.questions || []).map((item,index) => ({...item,id:item.id || index+1,text:item.text || item.question || '',options:item.options || item.answers || [],correct:item.correct,kind:item.kind || 'standard',seconds:item.seconds || 20,explanation:item.explanation || ''}))
+      })));
+    } catch (error) { setTeacherMessage(error.message); }
+  };
+  const teacherLogin = async () => {
+    setTeacherBusy(true); setTeacherMessage('');
+    const { data, error } = await supabase.auth.signInWithPassword({ email: teacherEmail.trim(), password: teacherPass });
+    setTeacherBusy(false);
+    if (error) { setTeacherMessage('Accesso non riuscito: controlla email e password.'); return; }
+    setTeacherSession(data.session); setTeacherUser(data.user);
+    await loadRemoteQuizzes(data.session);
+  };
+  const teacherLogout = async () => { await supabase.auth.signOut(); setTeacherSession(null); setTeacherUser(null); setSavedQuizzes([]); setTeacherPass(''); };
+
   const [quizArea,setQuizArea] = useState('biennio');
   const [quizClass,setQuizClass] = useState('1ª');
   const [quizTopic,setQuizTopic] = useState('');
@@ -80,12 +125,17 @@ function App() {
   const updateOption = (index,optionIndex,value) => setDraftQuestions(items=>items.map((item,i)=>i===index?{...item,options:item.options.map((option,j)=>j===optionIndex?value:option)}:item));
   const changeOptionCount = (index,count) => setDraftQuestions(items=>items.map((item,i)=>i===index?{...item,options:Array.from({length:count},(_,j)=>item.options[j]||''),correct:item.correct===null?null:Math.min(item.correct,count-1)}:item));
   const addDraftQuestion = () => {if(draftQuestions.length<50)setDraftQuestions(items=>[...items,{id:Date.now(),text:'',options:['','','',''],correct:null,kind:'standard',seconds:20,explanation:''}])};
-  const saveDraftQuiz = () => {
+  const saveDraftQuiz = async () => {
     const cleanQuestions=draftQuestions.map((item,index)=>({...item,number:index+1,options:item.options.map(v=>v.trim())}));
-    if(!title.trim()||!cleanQuestions.length||cleanQuestions.some(item=>!item.text.trim()||item.options.length<2||item.options.some(v=>!v)||item.correct===null))return;
-    const entry={id:Date.now(),title:title.trim(),area:quizArea,className:quizClass,topic:quizTopic.trim(),standardPoints:Number(standardPoints),plusPoints:Number(plusPoints),wrongPenalty:Number(wrongPenalty),questions:cleanQuestions,createdAt:new Date().toISOString()};
-    const updated=[entry,...savedQuizzes];setSavedQuizzes(updated);localStorage.setItem('quiz-scolastico-quizzes',JSON.stringify(updated));
-    setTitle('');setQuizTopic('');setQuizArea('biennio');setQuizClass('1ª');setDraftQuestions([{id:Date.now(),text:'',options:['','','',''],correct:0,kind:'standard',seconds:20,explanation:''}]);setScreen('teacher');
+    if(!teacherSession || !title.trim() || !cleanQuestions.length || cleanQuestions.some(item=>!item.text.trim()||item.options.length<2||item.options.some(v=>!v)||item.correct===null)) return;
+    setTeacherBusy(true); setTeacherMessage('');
+    try {
+      const response=await fetch(realtimeUrl+'/api/quizzes',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+teacherSession.access_token},body:JSON.stringify({title:title.trim(),subject:'IRC',school_level:quizArea,topic:quizTopic.trim(),questions:cleanQuestions,settings:{className:quizClass,standardPoints:Number(standardPoints),plusPoints:Number(plusPoints),wrongPenalty:Number(wrongPenalty)}})});
+      const data=await response.json(); if(!response.ok) throw new Error(data.error||'Salvataggio non riuscito.');
+      await loadRemoteQuizzes(teacherSession);
+      setTitle('');setQuizTopic('');setQuizArea('biennio');setQuizClass('1ª');setDraftQuestions([{id:Date.now(),text:'',options:['','','',''],correct:0,kind:'standard',seconds:20,explanation:''}]);setScreen('teacher');
+    } catch(error) { setTeacherMessage(error.message); }
+    finally { setTeacherBusy(false); }
   };
   const start = (a) => { setActiveQuiz({title:'Quiz dimostrativo IRC',questions:quiz.questions.map(item=>({...item,kind:'standard',seconds:20})),standardPoints:1000,plusPoints:1500,wrongPenalty:0,area:a});setArea(a);setQ(0);setAnswer(null);setScore(0);setCorrectCount(0);setScreen('game'); };
   const startSavedQuiz = (item) => {setActiveQuiz({...item,questions:item.questions.map(question=>({question:question.text,answers:question.options,correct:question.correct,explanation:question.explanation||'',kind:question.kind||'standard',seconds:question.seconds||20}))});setArea(item.area);setQ(0);setAnswer(null);setScore(0);setCorrectCount(0);setScreen('game');};
@@ -116,7 +166,7 @@ function App() {
       {liveError&&<div className="demo-notice">{liveError}</div>}</main>}
     {screen==='game' && <main className="game-page"><div className="game-top"><span className="game-brand"><span className="brand-mark"><GraduationCap size={19}/></span> QUIZ SCOLASTICO</span><span className="game-counter">DOMANDA {q+1} <i>/</i> {activeQuiz.questions.length}</span><span className="game-score"><Trophy size={17}/> {score.toLocaleString('it-IT')} PT</span></div><div className="progress-track"><div className="progress-fill" style={{width:((q+(answer!==null?1:0))/activeQuiz.questions.length*100)+'%'}}/></div><div className="game-meta"><span>{area.toUpperCase()} · IRC</span><span className="timer"><Clock3 size={16}/> 00:20</span></div><section className="question-panel"><span className="question-label">METTI ALLA PROVA LE TUE CONOSCENZE</span><h1>{current.question}</h1></section><div className="answer-grid">{current.answers.map((text,i)=><button key={text} disabled={answer!==null} onClick={()=>{setAnswer(i);if(i===current.correct){setCorrectCount(n=>n+1);setScore(s=>s+(current.kind==='plus'?activeQuiz.plusPoints:activeQuiz.standardPoints));}else{setScore(s=>s-activeQuiz.wrongPenalty);}}} className={'answer-tile '+colors[i]+' '+(answer!==null&&i===current.correct?'is-correct':'')+' '+(answer===i&&i!==current.correct?'is-wrong':'')}><span className="answer-letter">{letters[i]}</span><span>{text}</span>{answer!==null&&i===current.correct&&<CheckCircle2 className="answer-check"/>}{answer===i&&i!==current.correct&&<XCircle className="answer-check"/>}</button>)}</div>{answer!==null?<div className={'feedback-bar '+(answer===current.correct?'feedback-correct':'feedback-wrong')}><strong>{answer===current.correct?`Esatto! +${current.kind==='plus'?activeQuiz.plusPoints:activeQuiz.standardPoints} punti`:`Risposta non corretta. ${activeQuiz.wrongPenalty?`-${activeQuiz.wrongPenalty} punti`:''}`}</strong><span>{current.explanation}</span><button onClick={next}>{q===activeQuiz.questions.length-1?'Vedi i risultati':'Prossima domanda'} <ArrowRight size={16}/></button></div>:<p className="answer-hint">Scegli una risposta. Il tempo scorre!</p>}</main>}
     {screen==='results' && <main className="center-page"><div className="join-card results-card"><div className="podium-icon"><Crown size={38}/></div><span className="eyebrow">PARTITA COMPLETATA</span><h1>Ben fatto, {nickname||'campione'}!</h1><p>Hai concluso «{activeQuiz.title}».</p><div className="score-big">{score.toLocaleString('it-IT')}<small> PUNTI</small></div><div className="result-stats"><div><strong>{activeQuiz.questions.length}</strong><span>DOMANDE</span></div><div><strong>{correctCount}</strong><span>RISPOSTE ESATTE</span></div><div><strong>{Math.round(correctCount/activeQuiz.questions.length*100)}%</strong><span>PUNTEGGIO</span></div></div><button className="btn btn-primary btn-full" onClick={()=>setScreen('home')}>Torna alla home <ArrowRight size={17}/></button></div></main>}
-    {screen==='teacher' && <main className="center-page"><div className="join-card teacher-card"><button className="back-link" onClick={()=>setScreen('home')}><ArrowLeft size={16}/> Torna alla home</button><div className="join-icon"><ShieldCheck size={30}/></div><span className="eyebrow">SPAZIO RISERVATO</span><h1>Area docente.</h1><p>Accesso dimostrativo: la password sicura verrà configurata con il backend.</p>{!teacherOpen?<><label>PASSWORD DOCENTE</label><input type="password" className="field" value={teacherPass} onChange={e=>setTeacherPass(e.target.value)} placeholder="Password"/><button className="btn btn-primary btn-full" disabled={!teacherPass} onClick={()=>setTeacherOpen(true)}>Apri anteprima docente <ArrowRight size={17}/></button></>:<div className="teacher-dashboard"><div className="dashboard-head"><div><span className="eyebrow">LA TUA LIBRERIA</span><h2>I tuoi quiz</h2></div><button className="btn btn-primary" onClick={()=>setScreen('editor')}><Plus size={17}/> Nuovo quiz</button></div>{savedQuizzes.length===0?<div className="empty-library">Non hai ancora salvato quiz personali. Crea la tua prima sfida con «Nuovo quiz».</div>:savedQuizzes.map(item=><div className="quiz-row" key={item.id}><BookOpen size={22}/><div><b>{item.title}</b><small>{item.area.toUpperCase()} · {item.className} · {item.questions.length} DOMANDE</small><small>{item.standardPoints} PT STANDARD · {item.plusPoints} PT PLUS · −{item.wrongPenalty} PT ERRORE</small></div><button className="icon-btn" title="Avvia partita live" onClick={()=>hostQuiz(item)}><Play size={17}/></button></div>)}<div className="demo-notice">I quiz sono conservati in questo browser. La sincronizzazione online tra dispositivi sarà collegata al database nella fase backend.</div></div>}</div></main>}
+    {screen==='teacher' && <main className="center-page"><div className="join-card teacher-card"><button className="back-link" onClick={()=>setScreen('home')}><ArrowLeft size={16}/> Torna alla home</button><div className="join-icon"><ShieldCheck size={30}/></div><span className="eyebrow">SPAZIO RISERVATO</span><h1>Area docente.</h1><p>Accedi con le credenziali docente per aprire la tua libreria personale, sincronizzata online.</p>{!teacherUser?<><label>EMAIL DOCENTE</label><input type="email" className="field" value={teacherEmail} onChange={e=>setTeacherEmail(e.target.value)} placeholder="nome@scuola.it"/><label>PASSWORD</label><input type="password" className="field" value={teacherPass} onChange={e=>setTeacherPass(e.target.value)} placeholder="Password"/><button className="btn btn-primary btn-full" disabled={!teacherEmail.trim()||!teacherPass||teacherBusy} onClick={teacherLogin}>{teacherBusy?'Accesso in corso…':'Accedi' } <ArrowRight size={17}/></button>{teacherMessage&&<div className="demo-notice">{teacherMessage}</div>}</>:<div className="teacher-dashboard"><div className="dashboard-head"><div><span className="eyebrow">DOCENTE AUTENTICATO</span><small>{teacherUser.email}</small></div><button className="btn btn-ghost" onClick={teacherLogout}>Esci</button></div><div className="dashboard-head"><div><span className="eyebrow">LA TUA LIBRERIA</span><h2>I tuoi quiz</h2></div><button className="btn btn-primary" onClick={()=>setScreen('editor')}><Plus size={17}/> Nuovo quiz</button></div>{savedQuizzes.length===0?<div className="empty-library">Non hai ancora salvato quiz personali. Crea la tua prima sfida con «Nuovo quiz».</div>:savedQuizzes.map(item=><div className="quiz-row" key={item.id}><BookOpen size={22}/><div><b>{item.title}</b><small>{item.area.toUpperCase()} · {item.className} · {item.questions.length} DOMANDE</small><small>{item.standardPoints} PT STANDARD · {item.plusPoints} PT PLUS · −{item.wrongPenalty} PT ERRORE</small></div><button className="icon-btn" title="Avvia partita live" onClick={()=>hostQuiz(item)}><Play size={17}/></button></div>)}<div className="demo-notice">Archivio online sincronizzato con il tuo account docente.</div></div>}</div></main>}
     {screen==='editor' && <main className="editor-page"><div className="editor-wrap"><button className="back-link" onClick={()=>setScreen('teacher')}><ArrowLeft size={16}/> Area docente</button><div className="editor-heading"><div className="join-icon"><Pencil size={27}/></div><span className="eyebrow">CREAZIONE QUIZ</span><h1>Costruisci la tua sfida.</h1><p>Fino a 50 domande; ogni domanda può avere da 2 a 5 opzioni.</p></div>
       <section className="editor-section"><h2>Informazioni generali</h2><div className="editor-grid"><div className="editor-field wide"><label>TITOLO DEL QUIZ</label><input className="field" value={title} onChange={e=>setTitle(e.target.value)} placeholder="Es. Le religioni monoteiste"/></div><div className="editor-field"><label>PERCORSO</label><select className="field" value={quizArea} onChange={e=>setQuizArea(e.target.value)}><option value="biennio">Biennio</option><option value="triennio">Triennio</option></select></div><div className="editor-field"><label>CLASSE</label><select className="field" value={quizClass} onChange={e=>setQuizClass(e.target.value)}>{(quizArea==='biennio'?['1ª','2ª']:['3ª','4ª','5ª']).map(v=><option key={v}>{v}</option>)}</select></div><div className="editor-field wide"><label>ARGOMENTO (FACOLTATIVO)</label><input className="field" value={quizTopic} onChange={e=>setQuizTopic(e.target.value)} placeholder="Es. Bibbia, cristianesimo, etica..."/></div></div></section>
       <section className="editor-section"><h2>Regole del punteggio</h2><p className="section-help">Imposta i valori che verranno applicati durante la partita.</p><div className="score-settings"><div><label>PUNTEGGIO STANDARD</label><input className="field" type="number" min="0" step="50" value={standardPoints} onChange={e=>setStandardPoints(e.target.value)}/></div><div><label>PUNTEGGIO PLUS</label><input className="field" type="number" min="0" step="50" value={plusPoints} onChange={e=>setPlusPoints(e.target.value)}/></div><div><label>PENALITÀ ERRORE</label><input className="field" type="number" min="0" step="50" value={wrongPenalty} onChange={e=>setWrongPenalty(e.target.value)}/></div></div><p className="score-note">Le domande marcate PLUS assegnano il punteggio maggiorato; una risposta sbagliata sottrae la penalità impostata. Una risposta non data vale 0 punti.</p></section>
@@ -126,8 +176,8 @@ function App() {
       <div className="options-editor">{item.options.map((option,optionIndex)=><div className="option-editor" key={optionIndex}><span className="option-index">{['A','B','C','D','E'][optionIndex]}</span><input className="field" value={option} onChange={e=>updateOption(index,optionIndex,e.target.value)} placeholder={'Opzione '+['A','B','C','D','E'][optionIndex]}/><label className="correct-choice"><input type="radio" name={'correct-'+item.id} checked={item.correct===optionIndex} onChange={()=>updateDraft(index,{correct:optionIndex})}/> Corretta</label></div>)}</div>
       <div className="editor-grid question-extra"><div className="editor-field"><label>TEMPO (SECONDI)</label><select className="field" value={item.seconds} onChange={e=>updateDraft(index,{seconds:Number(e.target.value)})}>{[10,15,20,30,45,60,90,120].map(n=><option key={n} value={n}>{n} secondi</option>)}</select></div><div className="editor-field wide"><label>SPIEGAZIONE DELLA RISPOSTA (FACOLTATIVA)</label><textarea className="field explanation-input" value={item.explanation} onChange={e=>updateDraft(index,{explanation:e.target.value})} placeholder="Facoltativa: aggiungi una breve spiegazione didattica... "/></div></div>
       {draftQuestions.length>1&&<button className="remove-question" onClick={()=>setDraftQuestions(items=>items.filter((_,i)=>i!==index))}>Rimuovi questa domanda</button>}</article>)}</section>
-      <div className="editor-actions"><span>{draftQuestions.length} di 50 domande</span><button className="btn btn-primary btn-large" disabled={!title.trim()||draftQuestions.some(item=>!item.text.trim()||item.options.some(v=>!v.trim()))||Number(standardPoints)<0||Number(plusPoints)<0||Number(wrongPenalty)<0} onClick={saveDraftQuiz}>Salva quiz <CheckCircle2 size={17}/></button></div>
-      <div className="demo-notice">Salvataggio locale attivo: i quiz resteranno disponibili nello stesso browser e dispositivo. Per accedervi da altri dispositivi servirà il database online.</div></div></main>}
+      <div className="editor-actions"><span>{draftQuestions.length} di 50 domande</span><button className="btn btn-primary btn-large" disabled={!teacherSession||teacherBusy||!title.trim()||draftQuestions.some(item=>!item.text.trim()||item.options.some(v=>!v.trim()))||Number(standardPoints)<0||Number(plusPoints)<0||Number(wrongPenalty)<0} onClick={saveDraftQuiz}>Salva quiz <CheckCircle2 size={17}/></button></div>
+      {teacherMessage&&<div className="demo-notice">{teacherMessage}</div>}</div></main>}
   </div>;
 }
 createRoot(document.getElementById('root')).render(<App />);
