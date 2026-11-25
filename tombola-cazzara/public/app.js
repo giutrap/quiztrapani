@@ -57,12 +57,31 @@ $("drawBtn").onclick=async()=>{
   if(!r.ok)$("hostMessage").textContent=r.error;else $("hostMessage").textContent="Bocce in movimento. Vietato sbirciare.";
 };
 $("duration").onchange=async()=>{const r=await request("host:duration",{code,hostKey,duration:$("duration").value});if(!r.ok)$("hostMessage").textContent=r.error;};
-$("finishBtn").onclick=async()=>{if(confirm("Vuoi davvero chiudere la partita?")){await request("host:finish",{code,hostKey});$("hostMessage").textContent="Partita chiusa. Il banco ringrazia."; }};
+$("finishBtn").onclick=async()=>{if(confirm("Vuoi davvero chiudere la partita?")){const r=await request("host:finish",{code,hostKey});if(r.ok){$("hostMessage").textContent="Partita chiusa. Il banco ringrazia."; $("newGameBtn").classList.remove("hidden"); $("finishBtn").disabled=true;}}};
+$("newGameBtn").onclick=()=>{localStorage.removeItem("tc_host");role=null;code=null;hostKey=null;playerId=null;playerCards=[];drawn=[];lastNumber=null;$("newGameBtn").classList.add("hidden");$("finishBtn").disabled=false;$("hostMessage").textContent="";show("home");};
 socket.on("game:state",g=>{if(role==="host"&&g.code===code)renderState(g);});
 socket.on("draw:tick",d=>{if(role==="host"){$("timer").classList.remove("hidden");$("timer").textContent=d.seconds;}if(role==="player"){$("playerTimer").classList.remove("hidden");$("playerTimer").textContent=d.seconds;$("playerStatus").textContent="SUSPENSE! Il numero sta arrivando…";}});
 socket.on("draw:suspense",d=>{if(role==="player"){$("playerTimer").classList.remove("hidden");$("playerTimer").textContent=d.seconds;$("playerStatus").textContent="NON URLARE ANCORA. NON È USCITO."; }});
 socket.on("draw:revealed",d=>{drawn=d.drawn;lastNumber=d.number;if(role==="player"){$("playerTimer").classList.add("hidden");$("playerStatus").textContent="È USCITO IL "+d.number+"! Controlla le cartelle."; $("playerLast").textContent=d.number;renderSmorfia(d.number);renderCards(d.drawn);}if(role==="host"){$("stageNumber").textContent=d.number;$("stageCaption").textContent="IL NUMERO È USCITO. E MO' PAGATE.";}});
 socket.on("player:cards",d=>{if(role==="player"){playerCards=d.cards;renderCards(d.marks||drawn);}});
 socket.on("game:wins",wins=>{const text=wins.map(w=>w.nickname+" ha fatto "+w.tier+"!").join(" · ");if(role==="player")$("playerWins").textContent="🏆 "+text;if(role==="host")$("hostMessage").textContent="🏆 "+text;});
-const params=new URLSearchParams(location.search);if(params.get("join")){$("joinCode").value=params.get("join");show("join");}
+
+const jingleAudio={};
+document.querySelectorAll("[data-jingle]").forEach(button=>button.addEventListener("click",()=>{
+ const key=button.dataset.jingle,audio=jingleAudio[key];
+ if(!audio){$("hostMessage").textContent="Carica prima il file audio per questo jingle.";return;}
+ Object.values(jingleAudio).forEach(a=>{if(a!==audio){a.pause();a.currentTime=0;}});
+ audio.currentTime=0;audio.play().catch(()=>$("hostMessage").textContent="Il browser non ha consentito la riproduzione audio.");
+}));
+document.querySelectorAll("[data-jingle-file]").forEach(input=>input.addEventListener("change",()=>{
+ const file=input.files&&input.files[0];if(!file)return;
+ if(!/^audio\//i.test(file.type)&&!file.name.match(/\.(mp3|wav|ogg|m4a|aac)$/i)){$("hostMessage").textContent="Scegli un file audio MP3, WAV, OGG o M4A.";input.value="";return;}
+ const key=input.dataset.jingleFile;
+ if(jingleAudio[key]){jingleAudio[key].pause();URL.revokeObjectURL(jingleAudio[key].src);}
+ const audio=new Audio(URL.createObjectURL(file));jingleAudio[key]=audio;
+ const label=document.querySelector('[data-jingle-name="'+key+'"]');if(label)label.textContent=file.name;
+ const button=document.querySelector('[data-jingle="'+key+'"]');if(button)button.classList.add("loaded");
+ $("hostMessage").textContent="Jingle caricato: "+file.name;
+}));
+\nconst params=new URLSearchParams(location.search);if(params.get("join")){$("joinCode").value=params.get("join");show("join");}
 const saved=localStorage.getItem("tc_host");if(saved){try{const s=JSON.parse(saved);socket.on("connect",async()=>{if(role)return;const r=await request("host:resume",s);if(r.ok){role="host";code=s.code;hostKey=s.hostKey;$("roomCode").textContent=code;show("host");renderState(r.game);}});}catch(e){}}
