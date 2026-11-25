@@ -28,6 +28,11 @@
           <label class="field-label" for="duration">Secondi di suspense (minimo 5)</label>
           <select id="duration"><option value="5">5 secondi</option><option value="15">15 secondi</option><option value="20">20 secondi</option><option value="30">30 secondi</option><option value="45">45 secondi</option><option value="60">60 secondi</option></select>
           <button id="drawBtn" class="btn primary draw-btn">🎱 ESTRAI IL PROSSIMO NUMERO</button>
+          <div class="ambient-control">
+            <audio id="ambientAudio" src="/suspense.m4a" preload="auto" loop></audio>
+            <button type="button" id="ambientToggle" class="ambient-toggle" aria-pressed="false">♫ ATTIVA SOTTOFONDO</button>
+            <span>Atmosfera continua · volume basso</span>
+          </div>
           <div class="jingle-panel">
             <div class="jingle-heading"><strong>REGIA JINGLE</strong><span>Nove tasti liberi: assegna a ciascuno il suono che preferisci</span></div>
             <div class="jingle-grid">
