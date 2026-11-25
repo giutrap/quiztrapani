@@ -110,5 +110,49 @@ document.querySelectorAll("[data-jingle-file]").forEach(input=>input.addEventLis
  $("hostMessage").textContent="Jingle caricato: "+file.name;
 }));
 
-const params=new URLSearchParams(location.search);if(params.get("join")){$("joinCode").value=params.get("join");show("join");}
+
+/* Sottofondo ambientale: memorizzazione locale IndexedDB, loop e volume contenuto. */
+const ambienceAudio=new Audio();
+ambienceAudio.loop=true;
+ambienceAudio.volume=0.10;
+let ambienceReady=false, ambienceOn=false, ambienceObjectUrl=null;
+const ambienceDB= new Promise((resolve,reject)=>{
+ const req=indexedDB.open("tombola-cazzara-audio",1);
+ req.onupgradeneeded=()=>req.result.createObjectStore("sounds");
+ req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+});
+async function saveAmbience(blob){
+ const db=await ambienceDB;
+ await new Promise((resolve,reject)=>{const tx=db.transaction("sounds","readwrite");tx.objectStore("sounds").put(blob,"ambience");tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});
+}
+async function loadAmbience(){
+ try{
+  const db=await ambienceDB;
+  const blob=await new Promise((resolve,reject)=>{const tx=db.transaction("sounds","readonly");const req=tx.objectStore("sounds").get("ambience");req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});
+  if(blob){setAmbienceSource(blob);$("ambienceStatus").textContent="Traccia già caricata e ricordata su questo browser";}
+ }catch(e){$("ambienceStatus").textContent="Carica il file audio per attivare il sottofondo";}
+}
+function setAmbienceSource(blob){
+ if(ambienceObjectUrl)URL.revokeObjectURL(ambienceObjectUrl);
+ ambienceObjectUrl=URL.createObjectURL(blob);ambienceAudio.src=ambienceObjectUrl;ambienceReady=true;
+}
+async function toggleAmbience(force){
+ if(!ambienceReady){$("ambienceStatus").textContent="Prima carica il file suspense.m4a";return;}
+ const next=typeof force==="boolean"?force:!ambienceOn;
+ if(next){
+  try{await ambienceAudio.play();ambienceOn=true;$("ambienceToggle").textContent="♫ SUONO ON · SPEGNI";$("ambienceToggle").setAttribute("aria-pressed","true");$("ambienceStatus").textContent="Sottofondo in riproduzione continua";}
+  catch(e){ambienceOn=false;$("ambienceStatus").textContent="Premi di nuovo SUONO ON per consentire la riproduzione";}
+ }else{ambienceAudio.pause();ambienceOn=false;$("ambienceToggle").textContent="♫ SUONO OFF · ATTIVA";$("ambienceToggle").setAttribute("aria-pressed","false");$("ambienceStatus").textContent="Sottofondo disattivato";}
+}
+$("ambienceFile").addEventListener("change",async()=>{
+ const file=$("ambienceFile").files&&$("ambienceFile").files[0];if(!file)return;
+ if(!file.type.startsWith("audio/")&&!/\.(m4a|mp3|wav|ogg)$/i.test(file.name)){$("ambienceStatus").textContent="Formato audio non riconosciuto";return;}
+ setAmbienceSource(file);
+ try{await saveAmbience(file);$("ambienceStatus").textContent="Traccia salvata su questo browser · loop attivo";await toggleAmbience(true);}
+ catch(e){$("ambienceStatus").textContent="Traccia caricata solo per questa sessione";}
+});
+$("ambienceToggle").addEventListener("click",()=>toggleAmbience());
+$("ambienceVolume").addEventListener("input",e=>{ambienceAudio.volume=Number(e.target.value)/100;});
+loadAmbience();
+\nconst params=new URLSearchParams(location.search);if(params.get("join")){$("joinCode").value=params.get("join");show("join");}
 const saved=localStorage.getItem("tc_host");if(saved){try{const s=JSON.parse(saved);socket.on("connect",async()=>{if(role)return;const r=await request("host:resume",s);if(r.ok){role="host";code=s.code;hostKey=s.hostKey;$("roomCode").textContent=code;show("host");renderState(r.game);}});}catch(e){}}
