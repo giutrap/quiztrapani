@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { createRoot } from 'react-dom/client';
 import { GraduationCap, Sparkles, Trophy, Users, Clock3, BookOpen, ShieldCheck, ArrowLeft, ArrowRight, Play, Plus, Pencil, LogIn, Gamepad2, Star, Zap, CheckCircle2, XCircle, Crown } from 'lucide-react';
 import './styles.css';
+import { quizNatale2026 } from './quiz-natale-2026';
 
 const quiz = {
   questions: [
@@ -137,6 +138,7 @@ function App() {
   const [savedGames,setSavedGames] = useState([]);
   const [selectedGame,setSelectedGame] = useState(null);
   const [historyBusy,setHistoryBusy] = useState(false);
+  const christmasImportInProgressRef = useRef(false);
   const [savedQuizzes,setSavedQuizzes] = useState(()=>{try{const stored=JSON.parse(localStorage.getItem('quiz-scolastico-quizzes')||'[]');if(!stored.some(item=>item.id===christmasDemo.id)){const next=[christmasDemo,...stored];localStorage.setItem('quiz-scolastico-quizzes',JSON.stringify(next));return next;}return stored;}catch{localStorage.setItem('quiz-scolastico-quizzes',JSON.stringify([christmasDemo]));return [christmasDemo];}});
 
   useEffect(() => {
@@ -160,11 +162,38 @@ function App() {
       const response = await fetch(realtimeUrl + '/api/quizzes', { headers: { Authorization: 'Bearer ' + session.access_token } });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Errore caricamento archivio.');
-      setSavedQuizzes((data.quizzes || []).map(row => ({
+      let rows = data.quizzes || [];
+      const christmasQuizExists = rows.some(row => row.title === quizNatale2026.title);
+      if (christmasQuizExists) {
+        christmasImportInProgressRef.current = true;
+      } else if (!christmasImportInProgressRef.current) {
+        christmasImportInProgressRef.current = true;
+        try {
+          const importResponse = await fetch(realtimeUrl + '/api/quizzes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
+            body: JSON.stringify(quizNatale2026)
+          });
+          const importData = await importResponse.json();
+          if (!importResponse.ok) throw new Error(importData.error || 'Importazione Quiz Natale 2026 non riuscita.');
+          rows = [importData.quiz, ...rows];
+        } catch (importError) {
+          christmasImportInProgressRef.current = false;
+          setTeacherMessage(importError.message);
+        }
+      }
+      setSavedQuizzes(rows.map(row => ({
         id: row.id, title: row.title, area: row.school_level || 'biennio', className: row.settings?.className || '',
         topic: row.topic || '', standardPoints: row.settings?.standardPoints ?? 1000,
-        plusPoints: row.settings?.plusPoints ?? 1500, wrongPenalty: row.settings?.wrongPenalty ?? 0, speedBonuses:{first:row.settings?.speedBonusFirst ?? 300,second:row.settings?.speedBonusSecond ?? 200,third:row.settings?.speedBonusThird ?? 100},
-        questions: (row.questions || []).map((item,index) => ({...item,id:item.id || index+1,text:item.text || item.question || '',options:item.options || item.answers || [],correct:item.correct,kind:item.kind || 'standard',seconds:item.seconds || 20,explanation:item.explanation || ''}))
+        plusPoints: row.settings?.plusPoints ?? 1500, wrongPenalty: row.settings?.wrongPenalty ?? 0,
+        speedBonuses:{first:row.settings?.speedBonusFirst ?? 300,second:row.settings?.speedBonusSecond ?? 200,third:row.settings?.speedBonusThird ?? 100},
+        questions: (row.questions || []).map((item,index) => ({
+          ...item, id:item.id || index+1, text:item.text || item.question || '',
+          options:item.options || item.answers || [], correct:item.correct, kind:item.kind || 'standard',
+          points:Number(item.points ?? (item.kind === 'plus' ? row.settings?.plusPoints : row.settings?.standardPoints) ?? 1000),
+          wrongPenalty:Number(item.wrongPenalty ?? row.settings?.wrongPenalty ?? 0),
+          seconds:item.seconds || 20, explanation:item.explanation || ''
+        }))
       })));
     } catch (error) { setTeacherMessage(error.message); }
   };
