@@ -261,7 +261,7 @@ function App() {
       const response=await fetch(realtimeUrl+'/api/quizzes',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+teacherSession.access_token},body:JSON.stringify({title:title.trim(),subject:'IRC',school_level:quizArea,topic:quizTopic.trim(),questions:cleanQuestions,settings:{className:quizClass,standardPoints:Number(standardPoints),plusPoints:Number(plusPoints),wrongPenalty:Number(wrongPenalty),speedBonusFirst:Number(speedBonusFirst),speedBonusSecond:Number(speedBonusSecond),speedBonusThird:Number(speedBonusThird)}})});
       const data=await response.json(); if(!response.ok) throw new Error(data.error||'Salvataggio non riuscito.');
       await loadRemoteQuizzes(teacherSession);
-      setTitle('');setQuizTopic('');setQuizArea('biennio');setQuizClass('1ª');setSpeedBonusFirst(300);setSpeedBonusSecond(200);setSpeedBonusThird(100);setDraftQuestions([{id:Date.now(),text:'',options:['','','',''],correct:0,kind:'standard',seconds:20,explanation:''}]);setScreen('teacher');
+      setTitle('');setQuizTopic('');setQuizArea('biennio');setQuizClass('1ª');setSpeedBonusFirst(300);setSpeedBonusSecond(200);setSpeedBonusThird(100);setDraftQuestions([{id:Date.now(),text:'',options:['','','',''],correct:0,kind:'standard',seconds:15,explanation:''}]);setScreen('teacher');
     } catch(error) { setTeacherMessage(error.message); }
     finally { setTeacherBusy(false); }
   };
