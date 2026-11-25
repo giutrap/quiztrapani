@@ -138,7 +138,7 @@ io.on("connection", socket => {
   socket.on("host:duration", ({code,hostKey,duration},cb) => {
     const g=games.get(String(code||""));
     if(!g || g.hostKey!==hostKey || g.status==="suspense") return cb({ok:false,error:"Non è possibile modificare ora il timer"});
-    g.duration=Math.max(15,Math.min(60,Number(duration)||15)); emitState(g); cb({ok:true,duration:g.duration});
+    g.duration=Math.max(5,Math.min(60,Number(duration)||15)); emitState(g); cb({ok:true,duration:g.duration});
   });
   socket.on("host:draw", ({code,hostKey},cb) => {
     const g=games.get(String(code||""));
