@@ -69,14 +69,38 @@ socket.on("game:wins",wins=>{const text=wins.map(w=>w.nickname+" ha fatto "+w.ti
 
 const jingleSources=["/sounds/01-alleluja.mp3","/sounds/02-applausi.m4a","/sounds/03-deleterio.mp3","/sounds/04-numero-ingrato.mp3","/sounds/05-radetzky-march.mp3","/sounds/06-sigla-cazzara-lunga.m4a","/sounds/07-sigla-cazzara-breve.m4a","/sounds/08-vaffa.mp3","/sounds/09-warning.mp3"];
 const jingleAudio=jingleSources.map(src=>{const audio=new Audio(src);audio.preload="auto";return audio;});
-document.querySelectorAll("[data-jingle]").forEach(button=>button.addEventListener("click",()=>{
- const index=Number(button.dataset.jingle.replace("jingle",""))-1;
- const audio=jingleAudio[index];
- if(!audio){$("hostMessage").textContent="Suono non disponibile.";return;}
- jingleAudio.forEach(a=>{if(a!==audio){a.pause();a.currentTime=0;}});
- audio.currentTime=0;
- audio.play().catch(()=>{$("hostMessage").textContent="Impossibile riprodurre il suono. Riprova con un clic.";});
-}));
+const jingleButtons=[...document.querySelectorAll("[data-jingle]")];
+function stopJingles(){
+ jingleAudio.forEach(audio=>{audio.pause();audio.currentTime=0;});
+ jingleButtons.forEach(button=>{
+  button.classList.remove("is-playing");
+  if(button.dataset.originalLabel)button.textContent=button.dataset.originalLabel;
+ });
+}
+jingleButtons.forEach(button=>{
+ button.dataset.originalLabel=button.textContent;
+ button.addEventListener("click",()=>{
+  const index=Number(button.dataset.jingle.replace("jingle",""))-1;
+  const audio=jingleAudio[index];
+  if(!audio){$("hostMessage").textContent="Suono non disponibile.";return;}
+  if(!audio.paused){
+   stopJingles();
+   $("hostMessage").textContent="Suono interrotto.";
+   return;
+  }
+  stopJingles();
+  audio.currentTime=0;
+  audio.play().then(()=>{
+   button.classList.add("is-playing");
+   button.textContent="■ STOP · "+button.dataset.originalLabel.replace(/^▶\\s*/,"");
+   $("hostMessage").textContent="Riproduzione: "+button.dataset.originalLabel.replace(/^▶\\s*/,"");
+  }).catch(()=>{
+   stopJingles();
+   $("hostMessage").textContent="Impossibile riprodurre il suono. Riprova con un clic.";
+  });
+  audio.onended=()=>stopJingles();
+ });
+});
 
 
 /* Sottofondo ambientale: memorizzazione locale IndexedDB, loop e volume contenuto. */
