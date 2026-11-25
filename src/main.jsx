@@ -267,7 +267,7 @@ function App() {
     } catch(error) { setTeacherMessage(error.message); }
     finally { setTeacherBusy(false); }
   };
-  const start = (a) => { setActiveQuiz({title:'Quiz dimostrativo IRC',questions:quiz.questions.map(item=>({...item,kind:'standard',seconds:20})),standardPoints:1000,plusPoints:1500,wrongPenalty:0,area:a});setArea(a);setQ(0);setAnswer(null);setScore(0);setCorrectCount(0);setScreen('game'); };
+  const start = (a) => { setPracticeMode(false);setPracticeDeadline(null);setActiveQuiz({title:'Quiz dimostrativo IRC',questions:quiz.questions.map(item=>({...item,kind:'standard',seconds:20})),standardPoints:1000,plusPoints:1500,wrongPenalty:0,area:a});setArea(a);setQ(0);setAnswer(null);setScore(0);setCorrectCount(0);setScreen('game'); };
   const startSavedQuiz = (item) => {setActiveQuiz({...item,questions:item.questions.map(question=>({question:question.text,answers:question.options,correct:question.correct,explanation:question.explanation||'',kind:question.kind||'standard',points:Number(question.points??((question.kind||'standard')==='plus'?item.plusPoints:item.standardPoints)),wrongPenalty:Number(question.wrongPenalty??item.wrongPenalty),seconds:question.seconds||15}))});setArea(item.area);setQ(0);setAnswer(null);setScore(0);setCorrectCount(0);setScreen('game');};
 
   const startPracticeQuiz = item => {
