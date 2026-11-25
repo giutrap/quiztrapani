@@ -4,6 +4,8 @@ const { Server } = require("socket.io");
 const QRCode = require("qrcode");
 const crypto = require("crypto");
 const path = require("path");
+const fs = require("fs");
+const AdmZip = require("adm-zip");
 
 const app = express();
 const server = http.createServer(app);
@@ -11,6 +13,17 @@ const io = new Server(server, { cors: { origin: true } });
 const PORT = process.env.PORT || 10000;
 const games = new Map();
 
+// Estrae una sola volta i nove jingle caricati nel repository, prima di esporre la cartella pubblica.
+const soundArchive = path.join(__dirname, "tombola-cazzara-suoni.zip");
+const publicDir = path.join(__dirname, "public");
+if (fs.existsSync(soundArchive)) {
+  try {
+    new AdmZip(soundArchive).extractAllTo(publicDir, true);
+    console.log("Tombola Cazzara: nove jingle pronti in /sounds");
+  } catch (error) {
+    console.error("Errore estrazione archivio jingle:", error.message);
+  }
+}
 app.use(express.static(path.join(__dirname, "public")));
 app.get("/health", (_req, res) => res.json({ ok: true, app: "Tombola Cazzara" }));
 
