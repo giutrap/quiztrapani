@@ -60,6 +60,24 @@ app.post('/api/quizzes', authenticatedUser, async (req, res) => {
   res.status(201).json({ quiz: data });
 });
 
+app.put('/api/quizzes/:id', authenticatedUser, async (req, res) => {
+  const body = req.body || {};
+  if (!body.title?.trim() || !Array.isArray(body.questions) || !body.questions.length || body.questions.length > 50) {
+    return res.status(400).json({ error: 'Dati del quiz non validi.' });
+  }
+  const row = {
+    title: String(body.title).trim().slice(0, 180),
+    subject: String(body.subject || 'IRC').slice(0, 80),
+    school_level: String(body.school_level || '').slice(0, 80),
+    topic: String(body.topic || '').slice(0, 240),
+    questions: body.questions,
+    settings: body.settings || {}
+  };
+  const { data, error } = await supabaseAdmin.from('quizzes').update(row).eq('id', req.params.id).eq('owner_id', req.teacher.id).select('*').single();
+  if (error) { console.error('Supabase quiz update failed:', error); return res.status(500).json({ error: 'Aggiornamento quiz non riuscito.' }); }
+  res.json({ quiz: data });
+});
+
 app.delete('/api/quizzes/:id', authenticatedUser, async (req, res) => {
   const { error } = await supabaseAdmin.from('quizzes').delete().eq('id', req.params.id).eq('owner_id', req.teacher.id);
   if (error) return res.status(500).json({ error: 'Eliminazione quiz non riuscita.' });
