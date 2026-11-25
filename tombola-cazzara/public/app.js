@@ -83,5 +83,6 @@ document.querySelectorAll("[data-jingle-file]").forEach(input=>input.addEventLis
  const button=document.querySelector('[data-jingle="'+key+'"]');if(button)button.classList.add("loaded");
  $("hostMessage").textContent="Jingle caricato: "+file.name;
 }));
-\nconst params=new URLSearchParams(location.search);if(params.get("join")){$("joinCode").value=params.get("join");show("join");}
+
+const params=new URLSearchParams(location.search);if(params.get("join")){$("joinCode").value=params.get("join");show("join");}
 const saved=localStorage.getItem("tc_host");if(saved){try{const s=JSON.parse(saved);socket.on("connect",async()=>{if(role)return;const r=await request("host:resume",s);if(r.ok){role="host";code=s.code;hostKey=s.hostKey;$("roomCode").textContent=code;show("host");renderState(r.game);}});}catch(e){}}
