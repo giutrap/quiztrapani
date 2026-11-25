@@ -163,20 +163,20 @@ function App() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Errore caricamento archivio.');
       let rows = data.quizzes || [];
-      const christmasQuizExists = rows.some(row => row.title === quizNatale2026.title);
-      if (christmasQuizExists) {
-        christmasImportInProgressRef.current = true;
-      } else if (!christmasImportInProgressRef.current) {
+      const christmasRow = rows.find(row => row.title === quizNatale2026.title);
+      if (!christmasImportInProgressRef.current) {
         christmasImportInProgressRef.current = true;
         try {
-          const importResponse = await fetch(realtimeUrl + '/api/quizzes', {
-            method: 'POST',
+          const method = christmasRow ? 'PUT' : 'POST';
+          const url = christmasRow ? realtimeUrl + '/api/quizzes/' + christmasRow.id : realtimeUrl + '/api/quizzes';
+          const importResponse = await fetch(url, {
+            method,
             headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
             body: JSON.stringify(quizNatale2026)
           });
           const importData = await importResponse.json();
-          if (!importResponse.ok) throw new Error(importData.error || 'Importazione Quiz Natale 2026 non riuscita.');
-          rows = [importData.quiz, ...rows];
+          if (!importResponse.ok) throw new Error(importData.error || 'Preparazione Quiz Natale 2026 non riuscita.');
+          rows = christmasRow ? rows.map(row => row.id === christmasRow.id ? importData.quiz : row) : [importData.quiz, ...rows];
         } catch (importError) {
           christmasImportInProgressRef.current = false;
           setTeacherMessage(importError.message);
