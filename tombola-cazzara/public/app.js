@@ -2,6 +2,12 @@ const socket=io();
 const $=id=>document.getElementById(id);
 let role=null,code=null,hostKey=null,playerId=null,playerCards=[],drawn=[],lastNumber=null;
 const sections=["home","host","join","player"];
+function renderSmorfia(n){
+ const x=n?window.SMORFIA_DATA[n-1]:null;
+ const h=$("smorfiaLine"),p=$("playerSmorfia");
+ if(h){h.classList.toggle("hidden",!x);h.innerHTML=x?'<span class="smorfia-meaning">'+escapeHtml(x.meaning)+'</span><span class="smorfia-joke">“'+escapeHtml(x.joke)+'”</span><span class="smorfia-label">SMORFIA NAPOLETANA · VERSIONE CAZZARA</span>':'';}
+ if(p){p.classList.toggle("hidden",!x);p.innerHTML=x?'<strong>'+escapeHtml(x.meaning)+'</strong><span>“'+escapeHtml(x.joke)+'”</span>':'';}
+}
 function show(id){sections.forEach(s=>$(s).classList.toggle("hidden",s!==id));}
 function request(event,data){return new Promise(resolve=>socket.emit(event,data,resolve));}
 function renderBoard(numbers){const set=new Set(numbers||[]);$("board").innerHTML=Array.from({length:90},(_,i)=>i+1).map(n=>`<div class="ball ${set.has(n)?"out":""}">${n}</div>`).join("");}
@@ -10,6 +16,7 @@ function renderState(g){
   drawn=g.drawn||[];
   $("drawCount").textContent=drawn.length+" / 90 estratti";
   $("stageNumber").textContent=g.currentNumber??"?";
+  renderSmorfia(g.currentNumber);
   $("stageCaption").textContent=g.status==="suspense"?"IL DESTINO STA DECIDENDO":"SIAMO TUTTI IN ATTESA";
   $("history").innerHTML=drawn.length?drawn.slice(-8).reverse().map(n=>`<span>${n}</span>`).join(""):'<span class="muted">Ancora nessun numero. Che ansia.</span>';
   $("playerCount").textContent=g.players.length;
@@ -43,7 +50,7 @@ $("enterBtn").onclick=async()=>{
   if(!r.ok){$("joinMessage").textContent=r.error;return;}
   role="player";code=c;playerId=r.playerId;playerCards=r.cards;localStorage.setItem("tc_player_"+c,playerId);
   $("playerName").textContent=escapeHtml(nickname||"Giocatore");$("playerCode").textContent=c;
-  renderCards(r.game.drawn);$("playerLast").textContent=r.game.currentNumber??"—";show("player");
+  renderCards(r.game.drawn);$("playerLast").textContent=r.game.currentNumber??"—";renderSmorfia(r.game.currentNumber);show("player");
 };
 $("drawBtn").onclick=async()=>{
   const r=await request("host:draw",{code,hostKey});
@@ -54,7 +61,7 @@ $("finishBtn").onclick=async()=>{if(confirm("Vuoi davvero chiudere la partita?")
 socket.on("game:state",g=>{if(role==="host"&&g.code===code)renderState(g);});
 socket.on("draw:tick",d=>{if(role==="host"){$("timer").classList.remove("hidden");$("timer").textContent=d.seconds;}if(role==="player"){$("playerTimer").classList.remove("hidden");$("playerTimer").textContent=d.seconds;$("playerStatus").textContent="SUSPENSE! Il numero sta arrivando…";}});
 socket.on("draw:suspense",d=>{if(role==="player"){$("playerTimer").classList.remove("hidden");$("playerTimer").textContent=d.seconds;$("playerStatus").textContent="NON URLARE ANCORA. NON È USCITO."; }});
-socket.on("draw:revealed",d=>{drawn=d.drawn;lastNumber=d.number;if(role==="player"){$("playerTimer").classList.add("hidden");$("playerStatus").textContent="È USCITO IL "+d.number+"! Controlla le cartelle."; $("playerLast").textContent=d.number;renderCards(d.drawn);}if(role==="host"){$("stageNumber").textContent=d.number;$("stageCaption").textContent="IL NUMERO È USCITO. E MO' PAGATE.";}});
+socket.on("draw:revealed",d=>{drawn=d.drawn;lastNumber=d.number;if(role==="player"){$("playerTimer").classList.add("hidden");$("playerStatus").textContent="È USCITO IL "+d.number+"! Controlla le cartelle."; $("playerLast").textContent=d.number;renderSmorfia(d.number);renderCards(d.drawn);}if(role==="host"){$("stageNumber").textContent=d.number;$("stageCaption").textContent="IL NUMERO È USCITO. E MO' PAGATE.";}});
 socket.on("player:cards",d=>{if(role==="player"){playerCards=d.cards;renderCards(d.marks||drawn);}});
 socket.on("game:wins",wins=>{const text=wins.map(w=>w.nickname+" ha fatto "+w.tier+"!").join(" · ");if(role==="player")$("playerWins").textContent="🏆 "+text;if(role==="host")$("hostMessage").textContent="🏆 "+text;});
 const params=new URLSearchParams(location.search);if(params.get("join")){$("joinCode").value=params.get("join");show("join");}
