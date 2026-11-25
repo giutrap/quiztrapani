@@ -11,3 +11,20 @@
 .jingle-slot span{font-size:9px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .new-game{width:100%;margin-top:10px;background:var(--yellow);color:var(--ink)}
 @media(max-width:800px){.jingle-grid{grid-template-columns:1fr 1fr}}
+
+/* Regia desktop: controllo, tabellone e riepiloghi affiancati */
+.host-layout{grid-template-columns:276px minmax(0,1fr) 250px;align-items:start;gap:16px}
+.host-sidebar{display:flex;flex-direction:column;gap:16px;min-width:0}
+.side-panel{background:#fff;border:2px solid var(--ink);border-radius:16px;padding:16px;box-shadow:4px 5px 0 var(--ink);color:var(--ink);min-width:0}
+.side-panel h3{font:18px Anton;letter-spacing:.6px;margin:0 0 12px;color:var(--ink)}
+.side-panel .player-chip{background:var(--ink);color:white}
+.side-panel .win-line{background:#f4f0e8;color:var(--ink);border-left:4px solid var(--yellow);line-height:1.4}
+.side-panel .muted{color:var(--muted)}
+.players,.wins{border-top:0;padding-top:16px;margin-top:0}
+.number-stage > #stageNumber{font:clamp(90px,12vw,150px)/.9 Anton;color:var(--yellow)}
+.number-stage #stageCaption{font-size:11px;letter-spacing:3px;font-weight:800;margin-top:12px}
+.number-stage .smorfia-meaning{font:clamp(20px,2vw,27px)/1.05 Anton;color:var(--yellow);text-transform:uppercase;letter-spacing:.4px}
+.number-stage .smorfia-joke{font-size:clamp(12px,1vw,14px);font-weight:700;color:#fff;line-height:1.35;max-width:90%}
+.number-stage .smorfia-label{font-size:8px;letter-spacing:1.5px;color:#aaa5b7;font-weight:800}
+@media(max-width:1100px){.host-layout{grid-template-columns:260px minmax(0,1fr)}.host-sidebar{grid-column:2;display:grid;grid-template-columns:1fr 1fr}.control-panel{grid-row:span 2}}
+@media(max-width:800px){.host-layout{grid-template-columns:1fr}.host-sidebar{grid-column:1;display:grid;grid-template-columns:1fr}.number-stage > #stageNumber{font-size:110px}.number-stage .smorfia-meaning{font-size:22px}}
