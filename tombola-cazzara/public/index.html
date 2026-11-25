@@ -20,6 +20,22 @@
     </section>
     <section id="host" class="hidden">
       <div class="host-layout">
+        <div class="jingle-column">
+          <div class="jingle-panel">
+            <div class="jingle-heading"><strong>REGIA JINGLE</strong><span>Nove effetti fissi, pronti da richiamare durante la partita</span></div>
+            <div class="jingle-grid">
+              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="jingle1">▶ 1 · ALLELUJA</button><span data-jingle-name="jingle1">ALLELUJA</span></div>
+              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="jingle2">▶ 2 · APPLAUSI</button><span data-jingle-name="jingle2">APPLAUSI</span></div>
+              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="jingle3">▶ 3 · DELETERIO</button><span data-jingle-name="jingle3">DELETERIO</span></div>
+              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="jingle4">▶ 4 · NUMERO INGRATO</button><span data-jingle-name="jingle4">NUMERO INGRATO</span></div>
+              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="jingle5">▶ 5 · RADETZKY</button><span data-jingle-name="jingle5">RADETZKY</span></div>
+              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="jingle6">▶ 6 · SIGLA LUNGA</button><span data-jingle-name="jingle6">SIGLA LUNGA</span></div>
+              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="jingle7">▶ 7 · SIGLA BREVE</button><span data-jingle-name="jingle7">SIGLA BREVE</span></div>
+              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="jingle8">▶ 8 · VAFFA</button><span data-jingle-name="jingle8">VAFFA</span></div>
+              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="jingle9">▶ 9 · WARNING</button><span data-jingle-name="jingle9">WARNING</span></div>
+            </div>
+          </div>
+        </div>
         <div class="panel control-panel">
           <div class="code-label">CODICE PARTITA</div><div id="roomCode" class="room-code">------</div>
           <div id="qrWrap" class="qr-wrap"><div id="qrPlaceholder">QR CODE<br>IN ARRIVO</div><img id="qr" alt="QR code per entrare" class="hidden"></div>
@@ -35,20 +51,7 @@
             </div>
             <label class="ambience-volume" for="ambienceVolume">Volume basso <input id="ambienceVolume" type="range" min="0" max="30" value="10"></label>
           </div>
-          <div class="jingle-panel">
-            <div class="jingle-heading"><strong>REGIA JINGLE</strong><span>Nove effetti fissi, pronti da richiamare durante la partita</span></div>
-            <div class="jingle-grid">
-              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="jingle1">▶ 1 · ALLELUJA</button><span data-jingle-name="jingle1">ALLELUJA</span></div>
-              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="jingle2">▶ 2 · APPLAUSI</button><span data-jingle-name="jingle2">APPLAUSI</span></div>
-              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="jingle3">▶ 3 · DELETERIO</button><span data-jingle-name="jingle3">DELETERIO</span></div>
-              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="jingle4">▶ 4 · NUMERO INGRATO</button><span data-jingle-name="jingle4">NUMERO INGRATO</span></div>
-              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="jingle5">▶ 5 · RADETZKY</button><span data-jingle-name="jingle5">RADETZKY</span></div>
-              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="jingle6">▶ 6 · SIGLA LUNGA</button><span data-jingle-name="jingle6">SIGLA LUNGA</span></div>
-              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="jingle7">▶ 7 · SIGLA BREVE</button><span data-jingle-name="jingle7">SIGLA BREVE</span></div>
-              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="jingle8">▶ 8 · VAFFA</button><span data-jingle-name="jingle8">VAFFA</span></div>
-              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="jingle9">▶ 9 · WARNING</button><span data-jingle-name="jingle9">WARNING</span></div>
-            </div>
-          </div>
+
           <button id="finishBtn" class="btn danger">CHIUDI LA PARTITA</button>
           <button id="newGameBtn" class="btn secondary new-game hidden">↩ NUOVA PARTITA · TORNA ALLA HOME</button>
           <div id="hostMessage" class="message">La sala è pronta. Fai entrare il popolo.</div>
