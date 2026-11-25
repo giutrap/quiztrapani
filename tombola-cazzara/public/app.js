@@ -1,7 +1,33 @@
 const socket=io();
 const $=id=>document.getElementById(id);
 let role=null,code=null,hostKey=null,playerId=null,playerCards=[],drawn=[],lastNumber=null;
-const sections=["home","host","join","player"];
+const sections=["home","host","join","player"];\n
+// Sottofondo continuo della regia: parte al primo gesto dell'organizzatore.
+const ambientAudio=$("ambientAudio");
+const ambientToggle=$("ambientToggle");
+if(ambientAudio){
+  ambientAudio.volume=0.12;
+  const paintAmbient=on=>{
+    if(!ambientToggle)return;
+    ambientToggle.textContent=on?"♫ SOTTOFONDO ATTIVO · SPEGNI":"♫ ATTIVA SOTTOFONDO";
+    ambientToggle.classList.toggle("is-on",on);
+    ambientToggle.setAttribute("aria-pressed",String(on));
+  };
+  const startAmbient=()=>{
+    if(!ambientAudio)return;
+    ambientAudio.play().then(()=>paintAmbient(true)).catch(()=>paintAmbient(false));
+  };
+  const stopAmbient=()=>{
+    ambientAudio.pause();
+    paintAmbient(false);
+  };
+  if(ambientToggle)ambientToggle.addEventListener("click",()=>{
+    if(ambientAudio.paused)startAmbient();else stopAmbient();
+  });
+  ambientAudio.addEventListener("ended",()=>{ambientAudio.currentTime=0;startAmbient();});
+  window.startTombolaAmbient=startAmbient;
+}
+
 function renderSmorfia(n){
  const x=n?window.SMORFIA_DATA[n-1]:null;
  const h=$("smorfiaLine"),p=$("playerSmorfia");
