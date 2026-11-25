@@ -67,22 +67,15 @@ socket.on("draw:revealed",d=>{drawn=d.drawn;lastNumber=d.number;if(role==="playe
 socket.on("player:cards",d=>{if(role==="player"){playerCards=d.cards;renderCards(d.marks||drawn);}});
 socket.on("game:wins",wins=>{const text=wins.map(w=>w.nickname+" ha fatto "+w.tier+"!").join(" · ");if(role==="player")$("playerWins").textContent="🏆 "+text;if(role==="host")$("hostMessage").textContent="🏆 "+text;});
 
-const jingleAudio={};
+const jingleSources=["/sounds/01-alleluja.mp3","/sounds/02-applausi.m4a","/sounds/03-deleterio.mp3","/sounds/04-numero-ingrato.mp3","/sounds/05-radetzky-march.mp3","/sounds/06-sigla-cazzara-lunga.m4a","/sounds/07-sigla-cazzara-breve.m4a","/sounds/08-vaffa.mp3","/sounds/09-warning.mp3"];
+const jingleAudio=jingleSources.map(src=>{const audio=new Audio(src);audio.preload="auto";return audio;});
 document.querySelectorAll("[data-jingle]").forEach(button=>button.addEventListener("click",()=>{
- const key=button.dataset.jingle,audio=jingleAudio[key];
- if(!audio){$("hostMessage").textContent="Carica prima il file audio per questo jingle.";return;}
- Object.values(jingleAudio).forEach(a=>{if(a!==audio){a.pause();a.currentTime=0;}});
- audio.currentTime=0;audio.play().catch(()=>$("hostMessage").textContent="Il browser non ha consentito la riproduzione audio.");
-}));
-document.querySelectorAll("[data-jingle-file]").forEach(input=>input.addEventListener("change",()=>{
- const file=input.files&&input.files[0];if(!file)return;
- if(!/^audio\//i.test(file.type)&&!file.name.match(/\.(mp3|wav|ogg|m4a|aac)$/i)){$("hostMessage").textContent="Scegli un file audio MP3, WAV, OGG o M4A.";input.value="";return;}
- const key=input.dataset.jingleFile;
- if(jingleAudio[key]){jingleAudio[key].pause();URL.revokeObjectURL(jingleAudio[key].src);}
- const audio=new Audio(URL.createObjectURL(file));jingleAudio[key]=audio;
- const label=document.querySelector('[data-jingle-name="'+key+'"]');if(label)label.textContent=file.name;
- const button=document.querySelector('[data-jingle="'+key+'"]');if(button)button.classList.add("loaded");
- $("hostMessage").textContent="Jingle caricato: "+file.name;
+ const index=Number(button.dataset.jingle.replace("jingle",""))-1;
+ const audio=jingleAudio[index];
+ if(!audio){$("hostMessage").textContent="Suono non disponibile.";return;}
+ jingleAudio.forEach(a=>{if(a!==audio){a.pause();a.currentTime=0;}});
+ audio.currentTime=0;
+ audio.play().catch(()=>{$("hostMessage").textContent="Impossibile riprodurre il suono. Riprova con un clic.";});
 }));
 
 
