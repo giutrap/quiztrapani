@@ -28,7 +28,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -45,7 +45,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -62,7 +62,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -79,7 +79,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -96,7 +96,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -113,7 +113,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -130,7 +130,7 @@ export const quizNatale2026 = {
       "kind": "plus",
       "points": 2000,
       "wrongPenalty": 500,
-      "seconds": 25,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -147,7 +147,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -164,7 +164,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -181,7 +181,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -198,7 +198,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -215,7 +215,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -232,7 +232,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -249,7 +249,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -266,7 +266,7 @@ export const quizNatale2026 = {
       "kind": "plus",
       "points": 2000,
       "wrongPenalty": 500,
-      "seconds": 25,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -283,7 +283,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -300,7 +300,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -317,7 +317,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -334,7 +334,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -351,7 +351,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -368,7 +368,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -385,7 +385,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -402,7 +402,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -419,7 +419,7 @@ export const quizNatale2026 = {
       "kind": "plus",
       "points": 2000,
       "wrongPenalty": 500,
-      "seconds": 25,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -436,7 +436,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -453,7 +453,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -470,7 +470,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -487,7 +487,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -504,7 +504,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -521,7 +521,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -538,7 +538,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -555,7 +555,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -572,7 +572,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -589,7 +589,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -606,7 +606,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -623,7 +623,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -640,7 +640,7 @@ export const quizNatale2026 = {
       "kind": "plus",
       "points": 2000,
       "wrongPenalty": 500,
-      "seconds": 25,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -657,7 +657,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -674,7 +674,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -691,7 +691,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -708,7 +708,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -725,7 +725,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -742,7 +742,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -759,7 +759,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -776,7 +776,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -793,7 +793,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -810,7 +810,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -827,7 +827,7 @@ export const quizNatale2026 = {
       "kind": "standard",
       "points": 1000,
       "wrongPenalty": 0,
-      "seconds": 20,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -844,7 +844,7 @@ export const quizNatale2026 = {
       "kind": "plus",
       "points": 2000,
       "wrongPenalty": 500,
-      "seconds": 25,
+      "seconds": 15,
       "explanation": ""
     },
     {
@@ -861,7 +861,7 @@ export const quizNatale2026 = {
       "kind": "plus",
       "points": 2000,
       "wrongPenalty": 500,
-      "seconds": 25,
+      "seconds": 15,
       "explanation": ""
     }
   ]
