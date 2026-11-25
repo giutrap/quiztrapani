@@ -33,3 +33,12 @@
 .ambient-toggle{width:100%;padding:10px 8px;border:1px solid var(--ink);border-radius:8px;background:var(--ink);color:#fff;font:800 11px "DM Sans";letter-spacing:.4px;cursor:pointer}
 .ambient-toggle.is-on{background:var(--green);border-color:var(--green)}
 .ambient-control span{font-size:10px;color:var(--muted);text-align:center}
+
+.ambience-panel{margin:10px 0 14px;padding:12px;background:#f4f0e8;border:1px solid #ded8ca;border-radius:12px;color:var(--ink)}
+.ambience-head{display:flex;flex-direction:column;gap:4px;margin-bottom:9px}.ambience-head strong{font:18px Anton;letter-spacing:.5px}.ambience-head span{font-size:10px;color:var(--muted);line-height:1.35}
+.ambience-controls{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ambience-upload,.ambience-toggle{display:block;text-align:center;padding:10px 5px;border:0;border-radius:8px;background:var(--ink);color:white;font:800 10px "DM Sans";cursor:pointer}
+.ambience-upload{background:white;color:var(--hot);border:1px dashed #aaa3b3}.ambience-upload input{display:none}
+.ambience-toggle[aria-pressed="true"]{background:var(--green)}
+.ambience-volume{display:flex;align-items:center;gap:9px;margin-top:9px;font-size:10px;font-weight:700;color:var(--muted)}
+.ambience-volume input{margin:0;padding:0;flex:1;accent-color:var(--hot)}
