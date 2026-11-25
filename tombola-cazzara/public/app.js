@@ -1,7 +1,8 @@
 const socket=io();
 const $=id=>document.getElementById(id);
 let role=null,code=null,hostKey=null,playerId=null,playerCards=[],drawn=[],lastNumber=null;
-const sections=["home","host","join","player"];\n
+const sections=["home","host","join","player"];
+
 // Sottofondo continuo della regia: parte al primo gesto dell'organizzatore.
 const ambientAudio=$("ambientAudio");
 const ambientToggle=$("ambientToggle");
@@ -154,5 +155,6 @@ $("ambienceFile").addEventListener("change",async()=>{
 $("ambienceToggle").addEventListener("click",()=>toggleAmbience());
 $("ambienceVolume").addEventListener("input",e=>{ambienceAudio.volume=Number(e.target.value)/100;});
 loadAmbience();
-\nconst params=new URLSearchParams(location.search);if(params.get("join")){$("joinCode").value=params.get("join");show("join");}
+
+const params=new URLSearchParams(location.search);if(params.get("join")){$("joinCode").value=params.get("join");show("join");}
 const saved=localStorage.getItem("tc_host");if(saved){try{const s=JSON.parse(saved);socket.on("connect",async()=>{if(role)return;const r=await request("host:resume",s);if(r.ok){role="host";code=s.code;hostKey=s.hostKey;$("roomCode").textContent=code;show("host");renderState(r.game);}});}catch(e){}}
