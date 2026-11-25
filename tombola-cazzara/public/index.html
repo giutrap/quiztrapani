@@ -28,6 +28,18 @@
           <label class="field-label" for="duration">Secondi di suspense (minimo 5)</label>
           <select id="duration"><option value="5">5 secondi</option><option value="15">15 secondi</option><option value="20">20 secondi</option><option value="30">30 secondi</option><option value="45">45 secondi</option><option value="60">60 secondi</option></select>
           <button id="drawBtn" class="btn primary draw-btn">🎱 ESTRAI IL PROSSIMO NUMERO</button>
+          <div class="jingle-panel">
+            <div class="jingle-heading"><strong>REGIA JINGLE</strong><span>Carica i tuoi MP3 e richiamali quando vuoi</span></div>
+            <div class="jingle-grid">
+              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="ambo">▶ AMBO</button><label class="jingle-upload">＋ MP3<input type="file" accept="audio/*,.mp3,.wav,.ogg,.m4a" data-jingle-file="ambo"></label><span data-jingle-name="ambo">Nessun audio</span></div>
+              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="terno">▶ TERNO</button><label class="jingle-upload">＋ MP3<input type="file" accept="audio/*,.mp3,.wav,.ogg,.m4a" data-jingle-file="terno"></label><span data-jingle-name="terno">Nessun audio</span></div>
+              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="quaterna">▶ QUATERNA</button><label class="jingle-upload">＋ MP3<input type="file" accept="audio/*,.mp3,.wav,.ogg,.m4a" data-jingle-file="quaterna"></label><span data-jingle-name="quaterna">Nessun audio</span></div>
+              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="cinquina">▶ CINQUINA</button><label class="jingle-upload">＋ MP3<input type="file" accept="audio/*,.mp3,.wav,.ogg,.m4a" data-jingle-file="cinquina"></label><span data-jingle-name="cinquina">Nessun audio</span></div>
+              <div class="jingle-slot"><button type="button" class="jingle-play" data-jingle="tombola">▶ TOMBOLA!</button><label class="jingle-upload">＋ MP3<input type="file" accept="audio/*,.mp3,.wav,.ogg,.m4a" data-jingle-file="tombola"></label><span data-jingle-name="tombola">Nessun audio</span></div>
+            </div>
+          </div>
+          <button id="finishBtn" class="btn danger">CHIUDI LA PARTITA</button>
+          <button id="newGameBtn" class="btn secondary new-game hidden">↩ NUOVA PARTITA · TORNA ALLA HOME</button>
           <button id="finishBtn" class="btn danger">CHIUDI LA PARTITA</button>
           <div id="hostMessage" class="message">La sala è pronta. Fai entrare il popolo.</div>
         </div>
