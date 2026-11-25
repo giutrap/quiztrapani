@@ -109,7 +109,7 @@ function App() {
   useEffect(()=>{const timer=setInterval(()=>setLiveNow(Date.now()),200);return()=>clearInterval(timer);},[]);
   const realtimeUrl='https://quiz-scolastico-live.onrender.com';
   const watchSocket = socket => {socket.on('game:state',state=>{setLiveState(previous=>{if(previous?.questionIndex!==state.questionIndex)setStudentSelected(null);return state;});});socket.on('game:closed',()=>{setLiveError('La connessione del docente è terminata.');setScreen('home');});socket.on('connect_error',()=>setLiveError('Server della partita non raggiungibile. Riprova tra qualche secondo.'));};
-  const hostQuiz = item => {setLiveError('Connessione alla console docente...');const socket=io(realtimeUrl);setLiveSocket(socket);watchSocket(socket);socket.on('connect',()=>socket.emit('host:create',{accessToken:teacherSession?.access_token,quizId:item.id,quiz:{title:item.title,area:item.area,standardPoints:item.standardPoints,plusPoints:item.plusPoints,wrongPenalty:item.wrongPenalty,speedBonuses:item.speedBonuses||{first:300,second:200,third:100},questions:item.questions.map(q=>({question:q.text,answers:q.options,correct:q.correct,kind:q.kind||'standard',points:Number(q.points??(q.kind==='plus'?item.plusPoints:item.standardPoints)),wrongPenalty:Number(q.wrongPenalty??item.wrongPenalty),seconds:q.seconds||20,explanation:q.explanation||''}))}},response=>{if(!response?.ok){setLiveError(response?.error||'Impossibile creare la partita.');return;}setCode(response.code);setLiveState(response.state);setLiveError('');setScreen('host');}));};
+  const hostQuiz = item => {setLiveError('Connessione alla console docente...');const socket=io(realtimeUrl);setLiveSocket(socket);watchSocket(socket);socket.on('connect',()=>socket.emit('host:create',{accessToken:teacherSession?.access_token,quizId:item.id,quiz:{title:item.title,area:item.area,standardPoints:item.standardPoints,plusPoints:item.plusPoints,wrongPenalty:item.wrongPenalty,speedBonuses:item.speedBonuses||{first:300,second:200,third:100},questions:item.questions.map(q=>({question:q.text,answers:q.options,correct:q.correct,kind:q.kind||'standard',points:Number(q.points??(q.kind==='plus'?item.plusPoints:item.standardPoints)),wrongPenalty:Number(q.wrongPenalty??item.wrongPenalty),seconds:q.seconds||15,explanation:q.explanation||''}))}},response=>{if(!response?.ok){setLiveError(response?.error||'Impossibile creare la partita.');return;}setCode(response.code);setLiveState(response.state);setLiveError('');setScreen('host');}));};
   const joinLiveGame = () => {unlockGameAudio();setLiveError('Connessione alla partita...');const socket=io(realtimeUrl);setLiveSocket(socket);watchSocket(socket);socket.on('connect',()=>socket.emit('student:join',{code,nickname},response=>{if(!response?.ok){setLiveError(response?.error||'Impossibile entrare nella partita.');socket.disconnect();return;}setLiveState(response.state);setLiveError('');setStudentSelected(null);setScreen('student-live');}));};
   const hostAction = action => {if(action==='host:start'||action==='host:resume')unlockGameAudio();liveSocket?.emit(action,response=>{if(response?.error)setLiveError(response.error);});};
   const sendStudentAnswer = index => {if(studentSelected!==null)return;setStudentSelected(index);liveSocket?.emit('student:answer',{answer:index},response=>{if(!response?.ok){setLiveError(response?.error||'Risposta non inviata.');setStudentSelected(null);}});};
@@ -192,7 +192,7 @@ function App() {
           options:item.options || item.answers || [], correct:item.correct, kind:item.kind || 'standard',
           points:Number(item.points ?? (item.kind === 'plus' ? row.settings?.plusPoints : row.settings?.standardPoints) ?? 1000),
           wrongPenalty:Number(item.wrongPenalty ?? row.settings?.wrongPenalty ?? 0),
-          seconds:item.seconds || 20, explanation:item.explanation || ''
+          seconds:item.seconds || 15, explanation:item.explanation || ''
         }))
       })));
     } catch (error) { setTeacherMessage(error.message); }
@@ -247,12 +247,12 @@ function App() {
   const [speedBonusFirst,setSpeedBonusFirst] = useState(300);
   const [speedBonusSecond,setSpeedBonusSecond] = useState(200);
   const [speedBonusThird,setSpeedBonusThird] = useState(100);
-  const [draftQuestions,setDraftQuestions] = useState([{id:1,text:'',options:['','','',''],correct:null,kind:'standard',points:1000,wrongPenalty:0,seconds:20,explanation:''}]);
+  const [draftQuestions,setDraftQuestions] = useState([{id:1,text:'',options:['','','',''],correct:null,kind:'standard',points:1000,wrongPenalty:0,seconds:15,explanation:''}]);
   const current = activeQuiz.questions[q];
   const updateDraft = (index,patch) => setDraftQuestions(items=>items.map((item,i)=>i===index?{...item,...patch}:item));
   const updateOption = (index,optionIndex,value) => setDraftQuestions(items=>items.map((item,i)=>i===index?{...item,options:item.options.map((option,j)=>j===optionIndex?value:option)}:item));
   const changeOptionCount = (index,count) => setDraftQuestions(items=>items.map((item,i)=>i===index?{...item,options:Array.from({length:count},(_,j)=>item.options[j]||''),correct:item.correct===null?null:Math.min(item.correct,count-1)}:item));
-  const addDraftQuestion = () => {if(draftQuestions.length<50)setDraftQuestions(items=>[...items,{id:Date.now(),text:'',options:['','','',''],correct:null,kind:'standard',points:Number(standardPoints)||1000,wrongPenalty:Number(wrongPenalty)||0,seconds:20,explanation:''}])};
+  const addDraftQuestion = () => {if(draftQuestions.length<50)setDraftQuestions(items=>[...items,{id:Date.now(),text:'',options:['','','',''],correct:null,kind:'standard',points:Number(standardPoints)||1000,wrongPenalty:Number(wrongPenalty)||0,seconds:15,explanation:''}])};
   const saveDraftQuiz = async () => {
     const cleanQuestions=draftQuestions.map((item,index)=>({...item,number:index+1,points:Number(item.points??(item.kind==='plus'?plusPoints:standardPoints)),wrongPenalty:Number(item.wrongPenalty??wrongPenalty),options:item.options.map(v=>v.trim())}));
     if(!teacherSession || !title.trim() || !cleanQuestions.length || cleanQuestions.some(item=>!item.text.trim()||item.options.length<2||item.options.some(v=>!v)||item.correct===null)) return;
@@ -266,7 +266,7 @@ function App() {
     finally { setTeacherBusy(false); }
   };
   const start = (a) => { setActiveQuiz({title:'Quiz dimostrativo IRC',questions:quiz.questions.map(item=>({...item,kind:'standard',seconds:20})),standardPoints:1000,plusPoints:1500,wrongPenalty:0,area:a});setArea(a);setQ(0);setAnswer(null);setScore(0);setCorrectCount(0);setScreen('game'); };
-  const startSavedQuiz = (item) => {setActiveQuiz({...item,questions:item.questions.map(question=>({question:question.text,answers:question.options,correct:question.correct,explanation:question.explanation||'',kind:question.kind||'standard',points:Number(question.points??((question.kind||'standard')==='plus'?item.plusPoints:item.standardPoints)),wrongPenalty:Number(question.wrongPenalty??item.wrongPenalty),seconds:question.seconds||20}))});setArea(item.area);setQ(0);setAnswer(null);setScore(0);setCorrectCount(0);setScreen('game');};
+  const startSavedQuiz = (item) => {setActiveQuiz({...item,questions:item.questions.map(question=>({question:question.text,answers:question.options,correct:question.correct,explanation:question.explanation||'',kind:question.kind||'standard',points:Number(question.points??((question.kind||'standard')==='plus'?item.plusPoints:item.standardPoints)),wrongPenalty:Number(question.wrongPenalty??item.wrongPenalty),seconds:question.seconds||15}))});setArea(item.area);setQ(0);setAnswer(null);setScore(0);setCorrectCount(0);setScreen('game');};
   const next = () => { if (q === activeQuiz.questions.length-1) setScreen('results'); else {setQ(q+1);setAnswer(null);} };
   const Header = () => <header className="topbar"><button className="brand" onClick={()=>setScreen('home')}><span className="brand-mark"><GraduationCap size={22}/></span><span>quiz<span className="brand-light"> scolastico</span></span></button><span className="topbar-note"><Sparkles size={15}/> IMPARA, GIOCA, SFIDA TE STESSO</span></header>;
   return <div className="app-shell"><Header/>
