@@ -44,7 +44,6 @@
           </div>
           <button id="finishBtn" class="btn danger">CHIUDI LA PARTITA</button>
           <button id="newGameBtn" class="btn secondary new-game hidden">↩ NUOVA PARTITA · TORNA ALLA HOME</button>
-          <button id="finishBtn" class="btn danger">CHIUDI LA PARTITA</button>
           <div id="hostMessage" class="message">La sala è pronta. Fai entrare il popolo.</div>
         </div>
         <div class="panel stage-panel">
@@ -53,9 +52,12 @@
           <div id="timer" class="timer hidden">15</div>
           <div class="history"><strong>ULTIME USCITE</strong><div id="history" class="history-list"><span class="muted">Ancora nessun numero. Che ansia.</span></div></div>
           <h3>IL TABELLONE DELLA VERGOGNA</h3><div id="board" class="board"></div>
-          <div class="players"><h3>AL TAVOLO <span id="playerCount">0</span></h3><div id="playerList" class="player-list"><span class="muted">Aspettiamo i giocatori...</span></div></div>
-          <div class="wins"><h3>CHI HA FATTO IL FENOMENO</h3><div id="wins"></div></div>
+
         </div>
+        <aside class="host-sidebar">
+          <div class="panel side-panel players"><h3>AL TAVOLO <span id="playerCount">0</span></h3><div id="playerList" class="player-list"><span class="muted">Aspettiamo i giocatori...</span></div></div>
+          <div class="panel side-panel wins"><h3>CHI HA FATTO IL FENOMENO</h3><div id="wins"><span class="muted">Ancora nessuna vincita. Per ora.</span></div></div>
+        </aside>
       </div>
     </section>
     <section id="join" class="hidden">
