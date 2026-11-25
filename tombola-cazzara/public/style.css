@@ -28,3 +28,8 @@
 .number-stage .smorfia-label{font-size:8px;letter-spacing:1.5px;color:#aaa5b7;font-weight:800}
 @media(max-width:1100px){.host-layout{grid-template-columns:260px minmax(0,1fr)}.host-sidebar{grid-column:2;display:grid;grid-template-columns:1fr 1fr}.control-panel{grid-row:span 2}}
 @media(max-width:800px){.host-layout{grid-template-columns:1fr}.host-sidebar{grid-column:1;display:grid;grid-template-columns:1fr}.number-stage > #stageNumber{font-size:110px}.number-stage .smorfia-meaning{font-size:22px}}
+
+.ambient-control{margin:8px 0 14px;padding:10px 11px;background:#f4f0e8;border:1px solid #ded8ca;border-radius:10px;display:flex;flex-direction:column;gap:5px}
+.ambient-toggle{width:100%;padding:10px 8px;border:1px solid var(--ink);border-radius:8px;background:var(--ink);color:#fff;font:800 11px "DM Sans";letter-spacing:.4px;cursor:pointer}
+.ambient-toggle.is-on{background:var(--green);border-color:var(--green)}
+.ambient-control span{font-size:10px;color:var(--muted);text-align:center}
