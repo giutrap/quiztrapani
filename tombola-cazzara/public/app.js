@@ -60,7 +60,7 @@ function renderCards(marks){
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 $("hostBtn").onclick=async()=>{
-  role="host"; const r=await request("host:create",{});
+  role="host"; if(ambienceReady&&!ambienceOn)toggleAmbience(true); const r=await request("host:create",{});
   if(!r.ok)return alert("Non riesco a creare la partita");
   code=r.code;hostKey=r.hostKey;localStorage.setItem("tc_host",JSON.stringify({code,hostKey}));
   $("roomCode").textContent=code;
